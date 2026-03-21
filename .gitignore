@@ -1,0 +1,13 @@
+# IDEs và Editors rác
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# File môi trường nhạy cảm (CHẶN NGAY để không lộ mật khẩu DB)
+.env
+.env.local
