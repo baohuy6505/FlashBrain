@@ -38,7 +38,7 @@ fun HeaderUserSection() {
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.size(110.dp)
             ) {
-                // Avatar với viền vàng
+                // Avatar với viền vàng Pro
                 Box(
                     modifier = Modifier
                         .size(108.dp)
@@ -47,13 +47,13 @@ fun HeaderUserSection() {
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.avt),
-                        contentDescription = null,
+                        contentDescription = "User Avatar",
                         modifier = Modifier.size(100.dp).clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 }
 
-                // Nhãn PRO dạng viên thuốc - Dùng OFFSET thay cho padding âm để tránh crash
+                // Nhãn PRO
                 Surface(
                     color = ProGold,
                     shape = CircleShape,
@@ -75,7 +75,7 @@ fun HeaderUserSection() {
             Text(text = "phanxuantrungpxt123@gmail.com", fontSize = 14.sp, color = TextGray)
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = BgGray.copy(alpha = 0.5f), thickness = 1.dp)
+            HorizontalDivider(color = BgGray, thickness = 2.dp)
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(text = "TOTAL BALANCE", fontSize = 12.sp, color = TextGray, fontWeight = FontWeight.SemiBold)
@@ -86,7 +86,12 @@ fun HeaderUserSection() {
 
 @Composable
 fun ProStatusCard() {
-    Surface(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(24.dp), color = CardWhite, shadowElevation = 1.dp) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = CardWhite,
+        shadowElevation = 1.dp
+    ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "PRO STATUS", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextBlack)
@@ -94,13 +99,13 @@ fun ProStatusCard() {
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(text = "Pro Membership Active", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TextBlack)
-            Text(
-                text = "Ngày 12 tháng 03 năm 2005",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextGray.copy(alpha = 0.8f)
-            )
-            Button(onClick = { }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue), shape = RoundedCornerShape(12.dp)) {
+            Text(text = "Ngày 12 tháng 03 năm 2005", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextGray.copy(alpha = 0.8f))
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text(text = "Manage Plan", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
@@ -109,7 +114,11 @@ fun ProStatusCard() {
 
 @Composable
 fun StreakCard() {
-    Surface(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(24.dp), color = StreakBg) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = StreakBg
+    ) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.Top) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = "LEARNING STREAK", fontSize = 12.sp, color = ProGold, fontWeight = FontWeight.SemiBold)
@@ -123,5 +132,11 @@ fun StreakCard() {
 
 @Composable
 fun SectionTitle(title: String) {
-    Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextGray, modifier = Modifier.padding(start = 24.dp, bottom = 8.dp, top = 16.dp))
+    Text(
+        text = title,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Bold,
+        color = TextGray,
+        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp, top = 16.dp)
+    )
 }

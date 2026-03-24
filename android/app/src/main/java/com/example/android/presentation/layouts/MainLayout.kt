@@ -1,4 +1,4 @@
-package com.example.android.presentation.components
+package com.example.android.presentation.layouts
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -21,6 +21,27 @@ import androidx.compose.ui.unit.sp
 import com.example.android.R
 import com.example.android.presentation.ui.theme.*
 
+// --- HÀM BỌC CHÍNH (MAIN WRAPPER) ---
+@Composable
+fun MainLayout(
+    currentTab: Int,
+    onTabSelected: (Int) -> Unit,
+    content: @Composable () -> Unit
+) {
+    Scaffold(
+        topBar = { CommonTopBar() },
+        bottomBar = {
+            CommonBottomNavigation(selectedItem = currentTab) { onTabSelected(it) }
+        },
+        containerColor = BgGray
+    ) { innerPadding ->
+        // innerPadding giúp nội dung không bị đè bởi TopBar và BottomBar
+        Box(modifier = Modifier.padding(innerPadding)) {
+            content()
+        }
+    }
+}
+
 // --- THANH ĐIỀU HƯỚNG TRÊN (TOP BAR) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,15 +54,14 @@ fun CommonTopBar() {
             }
         },
         actions = {
-            // Box bao quanh để tạo viền cho Avatar nhỏ
             Box(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .size(42.dp) // Kích thước tổng thể của cụm avatar + viền
+                    .size(42.dp)
                     .border(
-                        width = 1.5.dp,     // Độ dày viền nhỏ cho thanh top bar
-                        color = ProGold, // Màu viền xanh đồng bộ
-                        shape = CircleShape  // Viền tròn hoàn toàn
+                        width = 1.5.dp,
+                        color = ProGold,
+                        shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -49,7 +69,7 @@ fun CommonTopBar() {
                     painter = painterResource(id = R.drawable.avt),
                     contentDescription = "Small Avatar",
                     modifier = Modifier
-                        .size(36.dp) // Kích thước ảnh nhỏ hơn Box một chút để hiện viền
+                        .size(36.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
@@ -72,7 +92,6 @@ fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp,
-        // Bo góc phần trên của thanh Menu dưới
         modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
     ) {
         items.forEachIndexed { index, item ->
@@ -86,7 +105,7 @@ fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
                     selectedTextColor = PrimaryBlue,
                     unselectedIconColor = TextGray,
                     unselectedTextColor = TextGray,
-                    indicatorColor = PrimaryBlue.copy(alpha = 0.1f) // Nền tròn mờ khi nút được chọn
+                    indicatorColor = PrimaryBlue.copy(alpha = 0.1f)
                 )
             )
         }
