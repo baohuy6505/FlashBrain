@@ -1,11 +1,11 @@
 const IDeckRepository = require("../interfaces/IDeckRepository");
 const DeckModel = require("../../domain/models/Deck");
 class DeckRepository extends IDeckRepository {
-  async createDeck(deck) {
+  async create(deck) {
     const newDeck = new DeckModel(deck);
     return await newDeck.save();
   }
-  async getDeckById(deckId, userId) {
+  async findById(deckId, userId) {
     const deck = await DeckModel.findOne({
       _id: deckId,
       is_deleted: false,
@@ -13,11 +13,11 @@ class DeckRepository extends IDeckRepository {
     });
     return deck;
   }
-  async getAllDecksByUserId(userId) {
+  async findAll(userId) {
     const decks = await DeckModel.find({ user_id: userId, is_deleted: false });
     return decks;
   }
-  async getPublicDecks(userId) {
+  async findPublic(userId) {
     const publicDecks = await DeckModel.find({
       is_public: true,
       is_deleted: false,
@@ -25,7 +25,7 @@ class DeckRepository extends IDeckRepository {
     });
     return publicDecks;
   }
-  async updateDeck(deckId, userId, deckUpdate) {
+  async updateById(deckId, userId, deckUpdate) {
     const updateData = {
       title: deckUpdate.title,
       is_public: deckUpdate.is_public,
@@ -40,7 +40,15 @@ class DeckRepository extends IDeckRepository {
     );
     return updatedDeck;
   }
-  async deleteSoftDeck(deckId, userId) {
+  async restoreById(deckId, userId) {
+    const restoredDeck = await DeckModel.findOneAndUpdate(
+      { _id: deckId, user_id: userId },
+      { $set: { is_deleted: false } },
+      { new: true },
+    );
+    return restoredDeck;
+  }
+  async softDelete(deckId, userId) {
     const deletedDeck = await DeckModel.findOneAndUpdate(
       { _id: deckId, user_id: userId },
       { $set: { is_deleted: true } },
@@ -48,7 +56,7 @@ class DeckRepository extends IDeckRepository {
     );
     return deletedDeck;
   }
-  async deleteDeck(deckId, userId) {
+  async hardDelete(deckId, userId) {
     const deletedDeck = await DeckModel.findOneAndDelete({
       _id: deckId,
       user_id: userId,
@@ -56,3 +64,4 @@ class DeckRepository extends IDeckRepository {
     return deletedDeck;
   }
 }
+module.exports = DeckRepository;

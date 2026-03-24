@@ -1,28 +1,32 @@
 class IDeckRepository {
-  async createDeck(deck) {
+  async create(deck) {
     throw new Error("Method not implemented");
   }
 
-  async getDeckById(deckId, userId) {
+  async findById(deckId, userId) {
     throw new Error("Method not implemented");
   }
 
-  async getAllDecksByUserId(userId) {
+  async findAll(userId) {
     throw new Error("Method not implemented");
   }
 
-  async getPublicDecks(userId) {
+  async findPublic(userId) {
     throw new Error("Method not implemented");
   }
 
-  async updateDeck(deckId, userId, deckUpdate) {
+  async updateById(deckId, userId, deckUpdate) {
     throw new Error("Method not implemented");
   }
 
-  async deleteSoftDeck(deckId, userId) {
+  async restoreById(deckId, userId) {
     throw new Error("Method not implemented");
   }
-  async deleteDeck(deckId, userId) {
+  
+  async softDelete(deckId, userId) {
+    throw new Error("Method not implemented");
+  }
+  async hardDelete(deckId, userId) {
     throw new Error("Method not implemented");
   }
 }
