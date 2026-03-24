@@ -1,19 +1,19 @@
 class IUserRepository {
-    async createUser(user) {
+    async create(user) {
         throw new Error("Method not implemented");
     }
-    async getUserByEmail(email) {
+    async findByEmail(email) {
         throw new Error("Method not implemented");
     }   
     // async getUserById(userId) {
-    //     throw new Error("Method not implemented");
+    //     throw new Error("Method not implemented"); // 
     // }
     // async updateUser(userId, userUpdate) {
-    //     throw new Error("Method not implemented");
+    //     throw new Error("Method not implemented"); //cập nhật tên, ảnh, mật khẩu, subscriptionType
     // }
     // async deleteUser(userId) {
-    //     throw new Error("Method not implemented");
+    //     throw new Error("Method not implemented");//xóa tài khoản
     // }
 }
 
-module.exports = IUserRepository;
+module.exports = IUserRepository; 

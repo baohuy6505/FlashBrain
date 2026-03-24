@@ -2,33 +2,34 @@ const IAuthService = require('../interfaces/IAuthService');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const userRepository = require('../../infrastructure/repositories/userRepository');
-const UserResponseDto = require('../dtos/authDto');
+const UserResponseDto = require('../dtos/authDto/userResponseDto');
 const { generateToken } = require('../utils/jwt');
 
 class AuthService extends IAuthService {
-    async register(body) {
-        const email = body.email?.trim().toLowerCase();
-        const password = body.password;
-        const name = body.name?.trim() || '';
+    async register(registerDto) {
+        
+        // 1. Dữ liệu lúc này đã đi qua RegisterRequestDto nên chắc chắn an toàn và sạch sẽ
+        const { email, password, name } = registerDto;
 
-        // 1. Kiểm tra email tồn tại chưa
-        const existingUser = await userRepository.getUserByEmail(email);
+
+        // 2. Kiểm tra email tồn tại chưa
+        const existingUser = await userRepository.findByEmail(email);
         if (existingUser) {
             throw new Error('Email đã được sử dụng');
         }
 
-        // 2. Băm mật khẩu
+        // 3. Băm mật khẩu
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // 3. Lưu vào DB (Lưu ý field password_hash khớp DB Document)
-        const newUser = await userRepository.createUser({
+        // 4. Lưu vào DB (Lưu ý field password_hash khớp DB Document)
+        const newUser = await userRepository.create({
             _id: uuidv4(),
             name,   
             email,
             passwordHash: passwordHash
         });
 
-        // 4. Trả về token và thông tin user đã qua DTO
+        // 5. Trả về token và thông tin user đã qua DTO
         // Bọc data vào trong một Object {} trước khi truyền vào hàm
         const token = generateToken({ 
             userId: newUser._id, 
@@ -43,11 +44,12 @@ class AuthService extends IAuthService {
 
     // --- CHỨC NĂNG ĐĂNG NHẬP ---
     async login(body) {
+
         const email = body.email?.trim().toLowerCase();
         const password = body.password;
 
         // 1. Tìm user
-        const user = await userRepository.getUserByEmail(email);
+        const user = await userRepository.findByEmail(email);
         if (!user) {
             throw new Error('Email hoặc mật khẩu không chính xác');
         }

@@ -2,7 +2,7 @@ const IUserRepository = require('../interfaces/IUserRepository');
 const User = require('../../domain/models/User');
 
 class UserRepository extends IUserRepository {
-    async createUser(userData) {
+    async create(userData) {
         const user = new User({
             _id: userData._id,
             email: userData.email,
@@ -14,7 +14,7 @@ class UserRepository extends IUserRepository {
         return await user.save();
     }
     
-    async getUserByEmail(email) {
+    async findByEmail(email) {
         return await User.findOne({ email: email, isDeleted: false });
     }
 }
