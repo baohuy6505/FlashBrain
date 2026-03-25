@@ -12,6 +12,8 @@ app.use(express.json());
 //Mock routes
 app.use('/api', routes);
 
+app.use(express.json());
+
 // Connect to MongoDB Atlas
 connectDB();
 

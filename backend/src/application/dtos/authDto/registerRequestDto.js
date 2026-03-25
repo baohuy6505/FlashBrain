@@ -18,7 +18,6 @@ class RegisterRequestDto {
             throw new Error("Tên quá dài");
         }
 
-        // validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(this.email)) {
             throw new Error("Email không hợp lệ");
@@ -32,7 +31,7 @@ class RegisterRequestDto {
             throw new Error("Password không được chứa khoảng trắng");
         }
 
-        return true; // Nếu tất cả validate đều pass   
+        return true; 
         } 
 }
 
