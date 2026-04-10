@@ -11,3 +11,5 @@ Thumbs.db
 # File môi trường nhạy cảm (CHẶN NGAY để không lộ mật khẩu DB)
 .env
 .env.local
+
+.node_modules/

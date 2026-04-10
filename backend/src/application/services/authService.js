@@ -4,6 +4,19 @@ const { v4: uuidv4 } = require('uuid');
 const userRepository = require('../../infrastructure/repositories/userRepository');
 const UserProfileResponseDto = require('../../application/dtos/authDto/userProfileResponseDto');
 const { generateToken } = require('../utils/jwt');
+const cloudinary = require('cloudinary').v2;
+
+const getPublicIdFromUrl = (url) => {
+    try {
+        const parts = url.split('/');
+        const uploadIndex = parts.findIndex(part => part === 'upload');
+        const publicIdWithExtension = parts.slice(uploadIndex + 2).join('/');
+        return publicIdWithExtension.split('.')[0];
+    } catch (error) {
+        console.error("Không thể tách Public ID từ URL:", error);
+        return null;
+    }
+};
 
 class AuthService extends IAuthService {
     async register(registerDto) {
@@ -73,12 +86,31 @@ class AuthService extends IAuthService {
     }
 
     async updateProfile(userId, updateDto) {
-
         const { name, image } = updateDto;
+
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            throw new Error("Người dùng không tồn tại hoặc đã bị khóa.");
+        }
         
+        const oldImage = user.image; // Lưu lại link cũ
+
         const updatedUser = await userRepository.updateUser(userId, { name, image });
         if (!updatedUser) {
             throw new Error("Không tìm thấy người dùng để cập nhật");
+        }
+
+        if (image && oldImage && image !== oldImage) {
+            const publicId = getPublicIdFromUrl(oldImage);
+            
+            if(publicId) {
+               try {
+                    await cloudinary.uploader.destroy(publicId);
+                    console.log(`Đã xóa ảnh cũ thành công: ${publicId}`);
+                } catch (err) {
+                    console.error("Lỗi xóa ảnh Cloudinary:", err.message);
+                }
+            }
         }
 
         return new UserProfileResponseDto(updatedUser);
@@ -117,5 +149,6 @@ class AuthService extends IAuthService {
 
         return true;
     }
+
 }
 module.exports = new AuthService();

@@ -28,13 +28,14 @@ class UserRepository extends IUserRepository {
         if (userUpdate.name !== undefined) updateData.name = userUpdate.name;
         if (userUpdate.image !== undefined) updateData.image = userUpdate.image;
         if (userUpdate.passwordHash !== undefined) updateData.passwordHash = userUpdate.passwordHash;
-        if (userUpdate.subscriptionType !== undefined) updateData.subscriptionType = userUpdate.subscriptionType;
-        
+        if (userUpdate.subscriptionType !== undefined) updateData.subscriptionType = userUpdate.subscriptionType;   
+
         return await User.findOneAndUpdate(
             { _id: userId, isDeleted: false },
             { $set: updateData },
-            { new: true }
+            { returnDocument: 'after' }
         );
+
     }
 
     async deleteUser(userId) {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
+const upload = require('../middlewares/uploadMiddleware');
 const { registerLimiter } = require('../middlewares/rateLimiter');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -22,7 +23,7 @@ router.get('/me', authMiddleware, authController.getMyProfile);
 
 // 5. Cập nhật thông tin cá nhân 
 // PUT /api/auth/me
-router.put('/me', authMiddleware, authController.updateMyProfile);
+router.put('/me', authMiddleware, upload.single('image'), authController.updateMyProfile);
 
 //6. Đổi mật khẩu
 // PUT /api/auth/me/password

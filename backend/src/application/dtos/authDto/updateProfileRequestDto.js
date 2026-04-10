@@ -14,7 +14,7 @@ class UpdateProfileRequestDto {
             throw new Error("Tên phải có độ dài từ 2 đến 50 ký tự");
         }
 
-        return true; // Nếu tất cả validate đều pass
+        return true;
     }
 }
 

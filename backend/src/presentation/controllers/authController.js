@@ -72,7 +72,15 @@ class AuthController {
         try {
             const userId = req.user.userId; 
             
-            const updateDto = new UpdateProfileRequestDto(req.body);
+            // 1. Lấy tên từ Body
+            const requestData = { name: req.body.name };
+
+            // 2. Nếu người dùng CÓ up file, multer sẽ để cái link Cloudinary ở req.file.path
+            if (req.file) {
+                requestData.image = req.file.path; 
+            }
+
+            const updateDto = new UpdateProfileRequestDto(requestData);
             updateDto.validate();
             
             const updatedProfile = await authService.updateProfile(userId, updateDto);
