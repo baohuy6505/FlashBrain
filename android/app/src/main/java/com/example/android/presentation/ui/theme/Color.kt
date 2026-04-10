@@ -9,8 +9,8 @@ val CardWhite = Color(0xFFFFFFFF) // Màu trắng của card
 val ProGold = Color(0xFF9E7E0F) // Màu vàng của chữ "PRO" và tia sét
 
 // Màu chữ
-val TextBlack = Color(0xFF000000)
-val TextGray = Color(0xFF000000)
+val TextBlack = Color(0xFF0F172A)
+val TextGray = Color(0xFF64748B)
 
 // Màu nền thẻ Streak
 val StreakBg = Color(0xFFFFF7E0)
