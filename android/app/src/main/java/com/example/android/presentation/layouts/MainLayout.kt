@@ -1,14 +1,20 @@
 package com.example.android.presentation.layouts
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,24 +26,149 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.android.R
 import com.example.android.presentation.ui.theme.*
+import kotlinx.coroutines.launch
 
 // --- HÀM BỌC CHÍNH (MAIN WRAPPER) ---
 @Composable
 fun MainLayout(
     currentTab: Int,
     onTabSelected: (Int) -> Unit,
+    onNavigateToNotification: () -> Unit,
+    onLogoutClick: () -> Unit = {}, // Callback đăng xuất
     content: @Composable () -> Unit
 ) {
-    Scaffold(
-        topBar = { CommonTopBar() },
-        bottomBar = {
-            CommonBottomNavigation(selectedItem = currentTab) { onTabSelected(it) }
-        },
-        containerColor = BgGray
-    ) { innerPadding ->
-        // innerPadding giúp nội dung không bị đè bởi TopBar và BottomBar
-        Box(modifier = Modifier.padding(innerPadding)) {
-            content()
+    val tabTitles = listOf("Gallery", "Decks", "Premium", "Settings")
+    val currentTitle = tabTitles.getOrElse(currentTab) { "" }
+
+    // 1. Quản lý trạng thái Drawer
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    // Hàm đóng drawer và chuyển tab
+    val navigateAndClose = { tabIndex: Int ->
+        scope.launch {
+            drawerState.close()
+            onTabSelected(tabIndex)
+        }
+    }
+
+    // 2. Bọc toàn bộ trong ModalNavigationDrawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = Color.White,
+                modifier = Modifier.width(300.dp)
+            ) {
+                // Tiêu đề / User Info trên Drawer
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(BgGray)
+                        .padding(24.dp)
+                ) {
+                    Image(
+                            painter = painterResource(id = R.drawable.avt),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, ProGold, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Xuân Trung", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+                    Text("xuan@example.com", fontSize = 14.sp, color = TextGray)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Các Menu Items
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                    label = { Text("Gallery") },
+                    selected = currentTab == 0,
+                    onClick = { navigateAndClose(0) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.ViewCarousel, contentDescription = null) },
+                    label = { Text("My Decks") },
+                    selected = currentTab == 1,
+                    onClick = { navigateAndClose(1) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ProGold) },
+                    label = { Text("Premium", color = ProGold, fontWeight = FontWeight.Bold) },
+                    selected = currentTab == 2,
+                    onClick = { navigateAndClose(2) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    label = { Text("Settings") },
+                    selected = currentTab == 3,
+                    onClick = { navigateAndClose(3) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp), color = BgGray)
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Outlined.Notifications, contentDescription = null) },
+                    label = { Text("Notifications") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            onNavigateToNotification()
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null) },
+                    label = { Text("Help & Support") },
+                    selected = false,
+                    onClick = { /* TODO */ },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Nút Đăng xuất ở dưới cùng
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color.Red) },
+                    label = { Text("Logout", color = Color.Red) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onLogoutClick()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
+                )
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                CommonTopBar(
+                    title = currentTitle,
+                    isSettingsTab = currentTab == 3,
+                    onNotificationClick = onNavigateToNotification,
+                    onMenuClick = { scope.launch { drawerState.open() } } // 3. Mở drawer khi bấm menu
+                )
+            },
+            bottomBar = {
+                CommonBottomNavigation(selectedItem = currentTab) { onTabSelected(it) }
+            },
+            containerColor = BgGray
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                content()
+            }
         }
     }
 }
@@ -45,41 +176,53 @@ fun MainLayout(
 // --- THANH ĐIỀU HƯỚNG TRÊN (TOP BAR) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommonTopBar() {
+fun CommonTopBar(
+    title: String,
+    isSettingsTab: Boolean,
+    onNotificationClick: () -> Unit,
+    onMenuClick: () -> Unit // Nhận sự kiện mở menu
+) {
     CenterAlignedTopAppBar(
-        title = { },
+        title = {
+            Text(
+                text = title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextGray,
+            )
+        },
         navigationIcon = {
-            IconButton(onClick = { }) {
+            IconButton(onClick = onMenuClick) { // Gắn sự kiện vào đây
                 Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextBlack)
             }
         },
         actions = {
-            Box(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(42.dp)
-                    .border(
-                        width = 1.5.dp,
-                        color = ProGold,
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.avt),
-                    contentDescription = "Small Avatar",
+            if (isSettingsTab) {
+                IconButton(onClick = onNotificationClick) {
+                    Icon(Icons.Outlined.Notifications, contentDescription = "Notifications", tint = TextBlack)
+                }
+            } else {
+                Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                        .padding(end = 16.dp)
+                        .size(42.dp)
+                        .border(width = 1.5.dp, color = ProGold, shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.avt),
+                        contentDescription = "Small Avatar",
+                        modifier = Modifier.size(36.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BgGray)
     )
 }
 
-// --- THANH ĐIỀU HƯỚNG DƯỚI (BOTTOM NAVIGATION) ---
+// ... (CommonBottomNavigation giữ nguyên như cũ) ...
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(

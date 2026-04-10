@@ -1,14 +1,14 @@
-package com.example.android.presentation.screens.profile
+package com.example.android.presentation.screens.profile.components.profile_setting
+
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,21 +18,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.android.presentation.ui.theme.*
 
-// --- CÁC THÀNH PHẦN CƠ BẢN (REUSABLE COMPONENTS) ---
-
 @Composable
 fun SettingRowBase(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    isWarning: Boolean = false, // Đã đổi tên từ isDestructive
+    isWarning: Boolean = false,
+    modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit = {}
 ) {
     val iconBgColor = if (isWarning) RedLogout.copy(alpha = 0.1f) else SettingIconDark.copy(alpha = 0.4f)
     val iconTint = if (isWarning) RedLogout else SystemIconGray
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -73,44 +72,20 @@ fun SettingRowValue(icon: ImageVector, title: String, subtitle: String, value: S
 }
 
 @Composable
-fun SettingRowClickable(icon: ImageVector, title: String, subtitle: String, isWarning: Boolean = false) {
-    SettingRowBase(icon = icon, title = title, subtitle = subtitle, isWarning = isWarning) {
+fun SettingRowClickable(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    isWarning: Boolean = false,
+    onClick: () -> Unit = {}
+) {
+    SettingRowBase(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        isWarning = isWarning,
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onClick() }
+    ) {
         if (!isWarning) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = TextGray)
-    }
-}
-
-// --- CÁC PHẦN CHÍNH (SECTIONS) DÙNG TRONG SCREEN ---
-
-@Composable
-fun GeneralSettingsSection() {
-    Surface(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = CardWhite
-    ) {
-        Column {
-            var noti by remember { mutableStateOf(true) }
-            SettingRowSwitch(Icons.Default.Notifications, "Push Notifications", "Daily reminders", noti) { noti = it }
-            HorizontalDivider(modifier = Modifier.padding(start = 72.dp), color = BgGray.copy(alpha = 0.5f))
-            SettingRowValue(Icons.Default.DarkMode, "Appearance", "Match system", "System")
-            HorizontalDivider(modifier = Modifier.padding(start = 72.dp), color = BgGray.copy(alpha = 0.5f))
-            SettingRowValue(Icons.Default.Language, "Language", "App interface", "English", true)
-        }
-    }
-}
-
-@Composable
-fun AccountSettingsSection() {
-    Surface(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = CardWhite
-    ) {
-        Column {
-            SettingRowClickable(Icons.Default.Lock, "Change Password", "Update credentials")
-            HorizontalDivider(modifier = Modifier.padding(start = 72.dp), color = BgGray.copy(alpha = 0.5f))
-            // Chỗ này truyền isWarning = true để nút Logout hiện màu đỏ
-            SettingRowClickable(Icons.AutoMirrored.Filled.ExitToApp, "Logout", "Sign out", isWarning = true)
-        }
     }
 }
