@@ -37,7 +37,7 @@ fun MainLayout(
     onLogoutClick: () -> Unit = {}, // Callback đăng xuất
     content: @Composable () -> Unit
 ) {
-    val tabTitles = listOf("Gallery", "Decks", "Premium", "Settings")
+    val tabTitles = listOf("Home", "Decks", "Premium", "Settings")
     val currentTitle = tabTitles.getOrElse(currentTab) { "" }
 
     // 1. Quản lý trạng thái Drawer
@@ -86,7 +86,7 @@ fun MainLayout(
                 // Các Menu Items
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
-                    label = { Text("Gallery") },
+                    label = { Text("Home") },
                     selected = currentTab == 0,
                     onClick = { navigateAndClose(0) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
@@ -226,7 +226,7 @@ fun CommonTopBar(
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(
-        Pair("GALLERY", Icons.Default.Dashboard),
+        Pair("HOME", Icons.Default.Dashboard),
         Pair("DECKS", Icons.Default.ViewCarousel),
         Pair("PREMIUM", Icons.Default.AutoAwesome),
         Pair("SETTINGS", Icons.Default.Person)

@@ -21,7 +21,8 @@ import com.example.android.presentation.screens.splash.SplashScreen
 import com.example.android.presentation.screens.notification.NotificationScreen
 import com.example.android.presentation.screens.profile.change_password.ChangePasswordScreen
 import com.example.android.presentation.screens.desk.DecksScreen
-// QUAN TRỌNG: Import màn hình FlashcardListScreen
+import com.example.android.presentation.screens.home.HomeScreen
+
 import com.example.android.presentation.screens.listdesk.FlashcardListScreen
 import com.example.android.presentation.ui.theme.AndroidTheme
 
@@ -62,10 +63,15 @@ class MainActivity : ComponentActivity() {
                             }
                         ) {
                             when (currentTab) {
-                                0 -> LoginScreen(
-                                    onNavigateToSignUp = { currentTab = 5 }, // Sang Đăng ký
-                                    onNavigateToHome = { currentTab = 3 },   // Sang Profile
-                                    onNavigateToForgotPassword = { currentTab = 4 } // Sang Quên MK
+//                                0 -> LoginScreen(
+//                                    onNavigateToSignUp = { currentTab = 5 }, // Sang Đăng ký
+//                                    onNavigateToHome = { currentTab = 3 },   // Sang Profile
+//                                    onNavigateToForgotPassword = { currentTab = 4 } // Sang Quên MK
+//                                )
+                                0 -> HomeScreen(
+                                    onNavigateToDecks = {
+                                        currentTab = 1
+                                    }
                                 )
                                 1 -> DecksScreen(
                                     onDeckClick = { deckId ->
