@@ -17,3 +17,7 @@ data class Flashcard(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
+data class DeckWithCards(
+    val deck: Deck,
+    val flashcards: List<Flashcard>
+)

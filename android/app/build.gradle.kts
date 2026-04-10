@@ -82,4 +82,11 @@ dependencies {
     // 6. ViewModel & Coroutines (Xử lý bất đồng bộ mượt mà)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+// Thêm dòng này để dùng được ChevronRight và hàng ngàn icon khác
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    //
+    implementation("androidx.compose.material:material-icons-extended")
+    //
+    implementation("androidx.compose.ui:ui-util")
+
 }
