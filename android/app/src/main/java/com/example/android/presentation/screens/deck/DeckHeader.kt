@@ -19,7 +19,7 @@ fun DeckHeader() {
         modifier = Modifier
             .fillMaxWidth()
 //            .offset(y = (-20).dp) // Nhích lên nhẹ nhàng hơn
-            .padding(bottom = 8.dp)
+            .padding(top = 16.dp, bottom = 8.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

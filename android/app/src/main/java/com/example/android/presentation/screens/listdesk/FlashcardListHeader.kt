@@ -14,19 +14,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.android.domain.model.Deck
+import com.example.android.presentation.ui.theme.*
 
 @Composable
-fun FlashcardListHeader(deck: Deck, totalCards: Int, mastery: Int, onReviewClick: () -> Unit) {
+fun FlashcardListHeader(
+    deck: Deck,
+    totalCards: Int,
+    mastery: Int,
+    onReviewClick: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
         Button(
-            onClick = onReviewClick, // Đã kết nối sự kiện
+            onClick = onReviewClick,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
+            colors = ButtonDefaults.buttonColors(containerColor = BlueMain)
         ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null)
+            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = White)
             Spacer(Modifier.width(8.dp))
-            Text("Review Now", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            @Suppress("DEPRECATION")
+            Text("Review Now", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = White)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -37,13 +44,13 @@ fun FlashcardListHeader(deck: Deck, totalCards: Int, mastery: Int, onReviewClick
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("TOTAL CARDS", fontSize = 10.sp, color = Color.Gray)
-                Text("$totalCards Cards", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("TOTAL CARDS", fontSize = 10.sp, color = TextLight)
+                Text("$totalCards Cards", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextDark)
             }
-            Box(modifier = Modifier.height(30.dp).width(1.dp).background(Color.LightGray))
+            Box(modifier = Modifier.height(30.dp).width(1.dp).background(BorderGray))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("MASTERY", fontSize = 10.sp, color = Color.Gray)
-                Text("$mastery%", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3F51B5))
+                Text("MASTERY", fontSize = 10.sp, color = TextLight)
+                Text("$mastery%", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = BlueMain)
             }
         }
     }

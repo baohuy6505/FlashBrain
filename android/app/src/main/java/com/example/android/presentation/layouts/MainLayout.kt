@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -28,23 +29,39 @@ import com.example.android.R
 import com.example.android.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 
+// --- MÀU SẮC GRADIENT CHO TỪNG TAB ---
+private val tabGradients = listOf(
+    // Home: xanh dương -> tím nhạt
+    listOf(Color(0xFF1A56DB), Color(0xFF3B82F6), Color(0xFF6366F1)),
+    // Decks: teal -> xanh dương
+    listOf(Color(0xFF0E7490), Color(0xFF06B6D4), Color(0xFF3B82F6)),
+    // Premium: nâu vàng -> vàng
+    listOf(Color(0xFF92400E), Color(0xFFD97706), Color(0xFFF59E0B)),
+    // Settings: xanh đậm -> tím
+    listOf(Color(0xFF1E3A5F), Color(0xFF1A56DB), Color(0xFF6366F1))
+)
+
+private val PremiumGold = Color(0xFFD97706)
+private val PremiumIndicator = Color(0xFFF59E0B).copy(alpha = 0.15f)
+private val PrimaryIndicator = Color(0xFF3B82F6).copy(alpha = 0.12f)
+private val UnselectedGray = Color(0xFF9CA3AF)
+private val AvatarBorderGold = Color(0xFFFACC15)
+
 // --- HÀM BỌC CHÍNH (MAIN WRAPPER) ---
 @Composable
 fun MainLayout(
     currentTab: Int,
     onTabSelected: (Int) -> Unit,
     onNavigateToNotification: () -> Unit,
-    onLogoutClick: () -> Unit = {}, // Callback đăng xuất
+    onLogoutClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val tabTitles = listOf("Home", "Decks", "Premium", "Settings")
     val currentTitle = tabTitles.getOrElse(currentTab) { "" }
 
-    // 1. Quản lý trạng thái Drawer
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Hàm đóng drawer và chuyển tab
     val navigateAndClose = { tabIndex: Int ->
         scope.launch {
             drawerState.close()
@@ -52,7 +69,6 @@ fun MainLayout(
         }
     }
 
-    // 2. Bọc toàn bộ trong ModalNavigationDrawer
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -60,60 +76,107 @@ fun MainLayout(
                 drawerContainerColor = Color.White,
                 modifier = Modifier.width(300.dp)
             ) {
-                // Tiêu đề / User Info trên Drawer
-                Column(
+                // Header Drawer với gradient
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(BgGray)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(Color(0xFF1A56DB), Color(0xFF6366F1))
+                            )
+                        )
                         .padding(24.dp)
                 ) {
-                    Image(
+                    Column {
+                        Image(
                             painter = painterResource(id = R.drawable.avt),
-                        contentDescription = "Avatar",
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, ProGold, CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Xuân Trung", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextBlack)
-                    Text("xuan@example.com", fontSize = 14.sp, color = TextGray)
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, AvatarBorderGold, CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Xuân Trung",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            "xuan@example.com",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.75f)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Các Menu Items
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
                     label = { Text("Home") },
                     selected = currentTab == 0,
                     onClick = { navigateAndClose(0) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color(0xFF3B82F6).copy(alpha = 0.12f),
+                        selectedIconColor = Color(0xFF1A56DB),
+                        selectedTextColor = Color(0xFF1A56DB)
+                    )
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.ViewCarousel, contentDescription = null) },
                     label = { Text("My Decks") },
                     selected = currentTab == 1,
                     onClick = { navigateAndClose(1) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color(0xFF06B6D4).copy(alpha = 0.12f),
+                        selectedIconColor = Color(0xFF0E7490),
+                        selectedTextColor = Color(0xFF0E7490)
+                    )
                 )
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ProGold) },
-                    label = { Text("Premium", color = ProGold, fontWeight = FontWeight.Bold) },
+                    icon = {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = PremiumGold
+                        )
+                    },
+                    label = {
+                        Text(
+                            "Premium",
+                            color = PremiumGold,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
                     selected = currentTab == 2,
                     onClick = { navigateAndClose(2) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color(0xFFF59E0B).copy(alpha = 0.12f)
+                    )
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Person, contentDescription = null) },
                     label = { Text("Settings") },
                     selected = currentTab == 3,
                     onClick = { navigateAndClose(3) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color(0xFF6366F1).copy(alpha = 0.12f),
+                        selectedIconColor = Color(0xFF1A56DB),
+                        selectedTextColor = Color(0xFF1A56DB)
+                    )
                 )
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp), color = BgGray)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                    color = BgGray
+                )
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.Notifications, contentDescription = null) },
@@ -127,9 +190,13 @@ fun MainLayout(
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
-
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null) },
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.HelpOutline,
+                            contentDescription = null
+                        )
+                    },
                     label = { Text("Help & Support") },
                     selected = false,
                     onClick = { /* TODO */ },
@@ -138,9 +205,14 @@ fun MainLayout(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Nút Đăng xuất ở dưới cùng
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color.Red) },
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = null,
+                            tint = Color.Red
+                        )
+                    },
                     label = { Text("Logout", color = Color.Red) },
                     selected = false,
                     onClick = {
@@ -156,9 +228,10 @@ fun MainLayout(
             topBar = {
                 CommonTopBar(
                     title = currentTitle,
+                    currentTab = currentTab,
                     isSettingsTab = currentTab == 3,
                     onNotificationClick = onNavigateToNotification,
-                    onMenuClick = { scope.launch { drawerState.open() } } // 3. Mở drawer khi bấm menu
+                    onMenuClick = { scope.launch { drawerState.open() } }
                 )
             },
             bottomBar = {
@@ -178,51 +251,98 @@ fun MainLayout(
 @Composable
 fun CommonTopBar(
     title: String,
+    currentTab: Int,
     isSettingsTab: Boolean,
     onNotificationClick: () -> Unit,
-    onMenuClick: () -> Unit // Nhận sự kiện mở menu
+    onMenuClick: () -> Unit
 ) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextGray,
+    val gradientColors = tabGradients.getOrElse(currentTab) { tabGradients[0] }
+    val gradient = Brush.linearGradient(colors = gradientColors)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(gradient)
+    ) {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                    letterSpacing = 0.2.sp
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onMenuClick) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                color = Color.White.copy(alpha = 0.18f),
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            },
+            actions = {
+                if (isSettingsTab) {
+                    // Tab Settings: hiện chuông thông báo
+                    IconButton(onClick = onNotificationClick) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(
+                                    color = Color.White.copy(alpha = 0.18f),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Outlined.Notifications,
+                                contentDescription = "Notifications",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                } else {
+                    // Các tab khác: hiện avatar
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .size(40.dp)
+                            .border(width = 2.dp, color = AvatarBorderGold, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.avt),
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.Transparent
             )
-        },
-        navigationIcon = {
-            IconButton(onClick = onMenuClick) { // Gắn sự kiện vào đây
-                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextBlack)
-            }
-        },
-        actions = {
-            if (isSettingsTab) {
-                IconButton(onClick = onNotificationClick) {
-                    Icon(Icons.Outlined.Notifications, contentDescription = "Notifications", tint = TextBlack)
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .size(42.dp)
-                        .border(width = 1.5.dp, color = ProGold, shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.avt),
-                        contentDescription = "Small Avatar",
-                        modifier = Modifier.size(36.dp).clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BgGray)
-    )
+        )
+    }
 }
 
-// ... (CommonBottomNavigation giữ nguyên như cũ) ...
+// --- THANH ĐIỀU HƯỚNG DƯỚI (BOTTOM NAV) ---
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(
@@ -234,21 +354,32 @@ fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
 
     NavigationBar(
         containerColor = Color.White,
-        tonalElevation = 8.dp,
-        modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+        tonalElevation = 0.dp,
+        modifier = Modifier.clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
     ) {
         items.forEachIndexed { index, item ->
+            val isPremium = index == 2
+            val selectedColor = if (isPremium) PremiumGold else Color(0xFF1A56DB)
+            val indicatorColor = if (isPremium) PremiumIndicator else PrimaryIndicator
+
             NavigationBarItem(
                 icon = { Icon(item.second, contentDescription = item.first) },
-                label = { Text(item.first, fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
+                label = {
+                    Text(
+                        text = item.first,
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.4.sp
+                    )
+                },
                 selected = selectedItem == index,
                 onClick = { onItemSelected(index) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryBlue,
-                    selectedTextColor = PrimaryBlue,
-                    unselectedIconColor = TextGray,
-                    unselectedTextColor = TextGray,
-                    indicatorColor = PrimaryBlue.copy(alpha = 0.1f)
+                    selectedIconColor = selectedColor,
+                    selectedTextColor = selectedColor,
+                    unselectedIconColor = UnselectedGray,
+                    unselectedTextColor = UnselectedGray,
+                    indicatorColor = indicatorColor
                 )
             )
         }

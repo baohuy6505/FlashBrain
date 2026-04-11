@@ -1,9 +1,9 @@
 package com.example.android.presentation.screens.premium
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,56 +29,53 @@ fun PremiumScreen() {
         Transaction(id = "t3", userId = "u1", type = "BUY_PACKAGE", amount = 9.99, status = "FAILED", createdAt = System.currentTimeMillis() - 400000000),
         Transaction(id = "t4", userId = "u1", type = "BUY_PACKAGE", amount = 9.99, status = "FAILED", createdAt = System.currentTimeMillis() - 400000000),
         Transaction(id = "t5", userId = "u1", type = "DEPOSIT", amount = 20.00, status = "PENDING", createdAt = System.currentTimeMillis() - 172800000),
-
-
     )
 
-    Scaffold(containerColor = Color(0xFFFAFAFA)) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 24.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-            item { PremiumHeader() }
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-            item { CurrentPlanCard() }
-            item { Spacer(modifier = Modifier.height(32.dp)) }
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
-                    Text("SELECT PACKAGE", fontSize = 10.sp, color = Color.Gray, modifier = Modifier.padding(horizontal = 16.dp))
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
-                }
+    // ĐÃ XÓA SCAFFOLD - Dùng trực tiếp LazyColumn làm gốc
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFAFAFA)) // Màu nền xám nhạt đồng bộ
+            .padding(horizontal = 24.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp) // Padding cho nội dung list
+    ) {
+        item { PremiumHeader() }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+        item { CurrentPlanCard() }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
+                Text("SELECT PACKAGE", fontSize = 10.sp, color = Color.Gray, modifier = Modifier.padding(horizontal = 16.dp))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
             }
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Render Packages
-            items(packages.size) { index ->
-                val pkg = packages[index]
-                if (index == 0) {
-                    PackageCard(
-                        pkg = pkg,
-                        subtitle = "Unlock your learning potential",
-                        features = listOf("Unlimited Flashcard Decks", "30 Day Review History"),
-                        isPopular = false,
-                        buttonText = "Choose Package"
-                    )
-                } else {
-                    PackageCard(
-                        pkg = pkg,
-                        subtitle = "Master your knowledge forever",
-                        features = listOf("All Future Features", "Priority Cognitive Support", "Exclusive Master Badges"),
-                        isPopular = true,
-                        buttonText = "Unlock Now"
-                    )
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-            item { TransactionSection(transactions = transactions) }
         }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+
+        // Render Packages
+        items(packages.size) { index ->
+            val pkg = packages[index]
+            if (index == 0) {
+                PackageCard(
+                    pkg = pkg,
+                    subtitle = "Unlock your learning potential",
+                    features = listOf("Unlimited Flashcard Decks", "30 Day Review History"),
+                    isPopular = false,
+                    buttonText = "Choose Package"
+                )
+            } else {
+                PackageCard(
+                    pkg = pkg,
+                    subtitle = "Master your knowledge forever",
+                    features = listOf("All Future Features", "Priority Cognitive Support", "Exclusive Master Badges"),
+                    isPopular = true,
+                    buttonText = "Unlock Now"
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { TransactionSection(transactions = transactions) }
     }
 }
