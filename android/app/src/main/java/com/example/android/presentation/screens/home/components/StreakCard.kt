@@ -20,7 +20,7 @@ fun StreakCard(state: HomeState) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp),
+            .height(180.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

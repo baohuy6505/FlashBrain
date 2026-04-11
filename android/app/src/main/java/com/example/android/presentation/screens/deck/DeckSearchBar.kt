@@ -18,7 +18,7 @@ fun DeckSearchBar(query: String, onQueryChange: (String) -> Unit) {
         leadingIcon = { Icon(Icons.Default.Search, null) },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+        .offset(y = (-12).dp),
         shape = RoundedCornerShape(16.dp)
     )
 }

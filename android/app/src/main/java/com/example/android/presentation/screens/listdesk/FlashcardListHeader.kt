@@ -16,15 +16,10 @@ import androidx.compose.ui.unit.sp
 import com.example.android.domain.model.Deck
 
 @Composable
-fun FlashcardListHeader(
-    deck: Deck,
-    totalCards: Int,
-    mastery: Int,
-    onReviewClick: () -> Unit // Thêm tham số này
-) {
+fun FlashcardListHeader(deck: Deck, totalCards: Int, mastery: Int, onReviewClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
         Button(
-            onClick = onReviewClick, // Gắn sự kiện vào đây
+            onClick = onReviewClick, // Đã kết nối sự kiện
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))

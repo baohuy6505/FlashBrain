@@ -104,10 +104,67 @@ class MainActivity : ComponentActivity() {
                                 onNavigateBack = { currentTab = 3 } // Xong xuôi quay lại tab Profile
                             )
                             // CHI TIẾT BỘ THẺ (Tab 8)
-                            8 -> FlashcardListScreen(
-                                onBack = { currentTab = 1 }, // Bấm Back quay lại danh sách Decks
-                                onReviewClick = { currentTab = 9 } // Bấm "Review Now" thì vào màn hình học (Study)
-                            )
+//                            8 -> FlashcardListScreen(
+//                                onBack = { currentTab = 1 }, // Bấm Back quay lại danh sách Decks
+//                                onReviewClick = { currentTab = 9 } // Bấm "Review Now" thì vào màn hình học (Study)
+//                            )
+                            8 -> {
+                                // 1. Tạo mock Deck
+                                val mockDeck = com.example.android.domain.model.Deck(
+                                    id = "1",
+                                    title = "Toán cao cấp",
+                                    userId = "user_123",
+                                    isPublic = true,
+
+                                    isDeleted = false
+                                )
+
+                                // 2. TẠO MOCK FLASHCARDS (Thay vì dùng emptyList)
+                                val mockFlashcards = listOf(
+                                    com.example.android.domain.model.Flashcard(
+                                        id = "f1",
+                                        deckId = "1",
+                                        frontText = "Đạo hàm của hàm số f(x) = ln(x) là gì?",
+                                        backText = "f'(x) = 1/x (với x > 0)",
+                                        interval = 0,
+                                        repetition = 0,
+                                        easeFactor = 2.5,
+                                        isDeleted = false
+                                    ),
+                                    com.example.android.domain.model.Flashcard(
+                                        id = "f2",
+                                        deckId = "1",
+                                        frontText = "Tính tích phân bất định: ∫ e^x dx",
+                                        backText = "e^x + C",
+                                        interval = 1,
+                                        repetition = 1,
+                                        easeFactor = 2.6,
+                                        isDeleted = false
+                                    ),
+                                    com.example.android.domain.model.Flashcard(
+                                        id = "f3",
+                                        deckId = "1",
+                                        frontText = "Viết công thức tính diện tích hình phẳng giới hạn bởi đồ thị y=f(x), trục hoành và hai đường thẳng x=a, x=b.",
+                                        backText = "S = ∫|f(x)| dx từ a đến b",
+                                        interval = 3,
+                                        repetition = 2,
+                                        easeFactor = 2.4,
+                                        isDeleted = false
+                                    )
+                                )
+
+                                // 3. Gộp Deck và Flashcards lại
+                                val mockData = com.example.android.domain.model.DeckWithCards(
+                                    deck = mockDeck,
+                                    flashcards = mockFlashcards // Truyền danh sách có dữ liệu vào đây
+                                )
+
+                                FlashcardListScreen(
+                                    data = mockData,
+                                    onBack = { currentTab = 1 },
+                                    onReviewClick = { currentTab = 9 }
+                                )
+                            }
                             // MÀN HÌNH HỌC TẬP (Tab 9)
                             9 -> StudyScreen(
                                 onExit = { currentTab = 8 } // Bấm nút tắt (X) thì quay lại trang chi tiết bộ thẻ
