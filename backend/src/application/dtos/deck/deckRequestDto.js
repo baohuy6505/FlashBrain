@@ -19,3 +19,5 @@ class deckRequestDto{
 
     
 }
+
+module.exports = deckRequestDto;

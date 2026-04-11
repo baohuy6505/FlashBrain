@@ -12,9 +12,9 @@ const flashcardSchema = new mongoose.Schema({
   repetition: { type: Number, default: 0 },//
   ease_factor: { type: Number, default: 2.5 },//
   
-  next_review_date: { type: Date, default: null },
+  next_review_date: { type: Date, default: Date.now }, // Thẻ mới tạo -> Học ngay
   last_reviewed_at: { type: Date, default: null },
-  isDeleted: { type: Boolean, default: false }
+  is_deleted: { type: Boolean, default: false } // Sửa chữ D viết hoa thành d thường
 }, { 
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
