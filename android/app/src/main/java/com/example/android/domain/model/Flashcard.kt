@@ -14,8 +14,8 @@ data class Flashcard(
 
     val lastReviewedAt: Long? = null,
     val isDeleted: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val createdAt: Long,
+    val updatedAt: Long
 )
 data class DeckWithCards(
     val deck: Deck,

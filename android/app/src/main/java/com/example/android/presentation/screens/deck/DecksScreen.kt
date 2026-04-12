@@ -1,4 +1,4 @@
-package com.example.android.presentation.screens.desk
+package com.example.android.presentation.screens.flashcard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,25 +16,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.android.domain.model.Deck
+import com.example.android.presentation.screens.desk.DeckActionBottomSheet
+import com.example.android.presentation.screens.desk.DeckHeader
+import com.example.android.presentation.screens.desk.DeckListItem
+import com.example.android.presentation.screens.desk.DeckSearchBar
 
 @Composable
-fun DecksScreen(onDeckClick: (String) -> Unit) {
-    val deckList = remember {
-        mutableStateListOf(
-            Deck(id = "1", userId = "vinh", title = "Toán Cao Cấp", isPublic = true),
-            Deck(id = "2", userId = "vinh", title = "Lập trình Android", isPublic = false)
-        )
-    }
+fun DecksScreen(
+    viewModel: DeckViewModel = hiltViewModel(),
+    onDeckClick: (String) -> Unit
+) {
+    //lay danh sach tu VM (da chuyen tu Flow sang State)
+    val deckList by viewModel.decksState.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
-
     // State quản lý việc hiển thị BottomSheet và biết đang Sửa hay Tạo mới
     var showSheet by remember { mutableStateOf(false) }
     var deckToEdit by remember { mutableStateOf<Deck?>(null) }
 
-    val filteredDecks = deckList.filter {
-        it.title.contains(searchQuery, ignoreCase = true) && !it.isDeleted
+    val filteredDecks by remember(deckList, searchQuery) {
+        derivedStateOf {
+            deckList.filter {
+                it.title.contains(searchQuery, ignoreCase = true) && !it.isDeleted
+            }
+        }
     }
 
     Box(
@@ -72,7 +80,7 @@ fun DecksScreen(onDeckClick: (String) -> Unit) {
                                 deckToEdit = deck // Gán bộ thẻ cần sửa
                                 showSheet = true  // Mở sheet
                             },
-                            onDelete = { deckList.remove(deck) }
+                            onDelete = { viewModel.deleteDeck(deck.id)}
                         )
                     }
                 }
@@ -98,28 +106,14 @@ fun DecksScreen(onDeckClick: (String) -> Unit) {
                 existingDeck = deckToEdit, // Nếu null là tạo mới, nếu có data là sửa
                 onDismiss = { showSheet = false },
                 onSave = { savedDeck ->
-                    if (deckToEdit == null) {
-                        // Thêm mới
-                        deckList.add(0, savedDeck)
-                    } else {
-                        // Sửa -> Tìm và cập nhật trong danh sách
-                        val index = deckList.indexOfFirst { it.id == savedDeck.id }
-                        if (index != -1) {
-                            deckList[index] = savedDeck
-                        }
-                    }
+                       viewModel.addOrUpdateDeck(
+                           id = deckToEdit?.id,
+                           title = savedDeck.title,
+                           isPublic = savedDeck.isPublic
+                       )
                     showSheet = false // Đóng sheet
                 }
             )
         }
-    }
-}
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun DecksScreenPreview() {
-    MaterialTheme {
-        DecksScreen(
-            onDeckClick = { /* Để trống vì Preview không cần xử lý click chuyển trang */ }
-        )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.android.presentation.screens.listdesk
+package com.example.android.presentation.screens.flashcard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +18,11 @@ import androidx.compose.ui.unit.sp
 import com.example.android.domain.model.Flashcard
 
 @Composable
-fun FlashcardListRow(flashcard: Flashcard) {
+fun FlashcardListRow(
+    flashcard: Flashcard,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+    ) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         shape = RoundedCornerShape(24.dp),
@@ -34,7 +38,10 @@ fun FlashcardListRow(flashcard: Flashcard) {
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A)
                 )
-                Icon(Icons.Default.DragIndicator, null, tint = Color.LightGray)
+                //Icon(Icons.Default.DragIndicator, null, tint = Color.LightGray)
+                IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.DragIndicator, null, tint = Color.LightGray)
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -48,15 +55,31 @@ fun FlashcardListRow(flashcard: Flashcard) {
             Spacer(modifier = Modifier.height(20.dp))
 
             // Hiển thị các chỉ số SM-2 thực tế
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FlashcardInfoTag(
-                    icon = Icons.Default.QueryBuilder,
-                    text = "Int: ${flashcard.interval}d"
-                )
-                FlashcardInfoTag(
-                    icon = Icons.Default.ShowChart,
-                    text = "Ease: ${String.format("%.1f", flashcard.easeFactor)}"
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FlashcardInfoTag(
+                        icon = Icons.Default.QueryBuilder,
+                        text = "Int: ${flashcard.interval}d"
+                    )
+                    FlashcardInfoTag(
+                        icon = Icons.Default.ShowChart,
+                        text = "Ease: ${String.format("%.1f", flashcard.easeFactor)}"
+                    )
+                }
+
+                // --- THÊM CÁC NÚT THAO TÁC Ở ĐÂY ---
+                Row {
+                    TextButton(onClick = onEdit) {
+                        Text("Sửa", color = Color(0xFF3F51B5))
+                    }
+                    TextButton(onClick = onDelete) {
+                        Text("Xóa", color = Color(0xFFE53935))
+                    }
+                }
             }
         }
     }

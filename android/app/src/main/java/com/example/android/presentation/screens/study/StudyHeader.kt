@@ -47,7 +47,9 @@ fun StudyHeader(current: Int, total: Int, onBack: () -> Unit) {
         }
 
         LinearProgressIndicator(
-            progress = { current.toFloat() / total.toFloat() },
+            progress = {
+                if (total > 0) current.toFloat() / total.toFloat() else 0f
+            },
             modifier = Modifier
                 .width(70.dp)
                 .height(6.dp)
