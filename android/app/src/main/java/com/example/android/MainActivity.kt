@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.android.presentation.layouts.MainLayout
 import com.example.android.presentation.screens.profile.ProfileScreen
+import com.example.android.presentation.screens.profile.ProfileViewModel
 import com.example.android.presentation.screens.study.StudyScreen
 import com.example.android.presentation.screens.premium.PremiumScreen
 import com.example.android.presentation.screens.auth.register.RegisterScreen
@@ -40,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "splash"
                 ) {
 
-                    // ── SPLASH ──────────────────────────────────────────────
+                    // ── SPLASH ──
                     composable("splash") {
                         SplashScreen(onNavigateNext = {
                             navController.navigate("main_flow") {
@@ -49,12 +51,15 @@ class MainActivity : ComponentActivity() {
                         })
                     }
 
-                    // ── MAIN FLOW (có Bottom Bar) ────────────────────────────
+                    // ── MAIN FLOW (Đồng bộ Drawer & Bottom Bar) ──
                     composable("main_flow") {
+                        val profileViewModel: ProfileViewModel = hiltViewModel()
+                        val userData by profileViewModel.userData.collectAsState()
                         var currentTab by remember { mutableIntStateOf(0) }
 
                         MainLayout(
                             currentTab = currentTab,
+                            user = userData,
                             onTabSelected = { currentTab = it },
                             onNavigateToNotification = {
                                 navController.navigate("notification")
@@ -76,6 +81,7 @@ class MainActivity : ComponentActivity() {
                                 )
                                 2 -> PremiumScreen()
                                 3 -> ProfileScreen(
+                                    viewModel = profileViewModel,
                                     onNavigateToChangePassword = {
                                         navController.navigate("change_password")
                                     }
@@ -84,7 +90,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // ── FLASHCARD LIST ───────────────────────────────────────
+                    // ── FLASHCARD LIST ──
                     composable(
                         route = "flashcard_list/{deckId}",
                         arguments = listOf(
@@ -99,7 +105,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // ── STUDY (SM-2) ─────────────────────────────────────────
+                    // ── STUDY ──
                     composable(
                         route = "study/{deckId}",
                         arguments = listOf(
@@ -113,33 +119,33 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // ── NOTIFICATION ─────────────────────────────────────────
+                    // ── NOTIFICATION ──
                     composable("notification") {
                         NotificationScreen(
-                            onNavigateBack = { navController.popBackStack() } // Đổi từ onBack thành onNavigateBack
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
 
-// ── CHANGE PASSWORD ──────────────────────────────────────
+                    // ── CHANGE PASSWORD ──
                     composable("change_password") {
                         ChangePasswordScreen(
-                            onNavigateBack = { navController.popBackStack() } // Đổi từ onBack thành onNavigateBack
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
 
-// ── FORGOT PASSWORD ──────────────────────────────────────
+                    // ── FORGOT PASSWORD ──
                     composable("forgot_password") {
                         ForgotPasswordScreen(
                             onNavigateBack = { navController.popBackStack() },
-                            onNavigateToLogin = { navController.popBackStack() } // Thêm dòng này để quay về Login
+                            onNavigateToLogin = { navController.popBackStack() }
                         )
                     }
 
-// ── REGISTER ─────────────────────────────────────────────
+                    // ── REGISTER ──
                     composable("register") {
                         RegisterScreen(
-                            onNavigateToLogin = { navController.popBackStack() }, // Khớp với tham số 1
-                            onNavigateToHome = { // Khớp với tham số 2
+                            onNavigateToLogin = { navController.popBackStack() },
+                            onNavigateToHome = {
                                 navController.navigate("main_flow") {
                                     popUpTo("register") { inclusive = true }
                                 }

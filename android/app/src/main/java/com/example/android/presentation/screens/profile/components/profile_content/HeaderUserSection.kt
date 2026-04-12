@@ -1,5 +1,6 @@
 package com.example.android.presentation.screens.profile.components.profile_content
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -31,6 +32,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.android.R
 import com.example.android.presentation.ui.theme.*
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun HeaderUserSection(
@@ -38,31 +41,28 @@ fun HeaderUserSection(
     email: String,
     balance: Double,
     isPro: Boolean,
-    avatarUri: Uri?,
-    onNameChange: (String) -> Unit,
-    onAvatarChange: (Uri?) -> Unit
+    avatarUri: String?, // Kiểu String để khớp với User Model (URL từ Server)
+    onUpdateClick: (String, String?) -> Unit // Trả về Name và Path của ảnh để ViewModel xử lý
 ) {
+    val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
     var showAvatarPreview by remember { mutableStateOf(false) }
 
-    // --- CÁC BIẾN TẠM ĐỂ GIỮ TRẠNG THÁI TRONG DIALOG ---
+    // --- TRẠNG THÁI TẠM TRONG DIALOG ---
     var editedName by remember { mutableStateOf(name) }
-    var tempAvatarUri by remember { mutableStateOf(avatarUri) }
+    var tempAvatarUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Cập nhật lại biến tạm mỗi khi Dialog mở ra để đồng bộ với dữ liệu gốc
+    // Đồng bộ lại khi mở Dialog
     LaunchedEffect(showEditDialog) {
         if (showEditDialog) {
             editedName = name
-            tempAvatarUri = avatarUri
+            tempAvatarUri = null
         }
     }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            // Chỉ cập nhật vào biến tạm, KHÔNG gọi onAvatarChange ở đây
-            if (uri != null) tempAvatarUri = uri
-        }
+        onResult = { uri -> if (uri != null) tempAvatarUri = uri }
     )
 
     Surface(
@@ -76,23 +76,18 @@ fun HeaderUserSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // --- BOX AVATAR ---
-            Box(
-                contentAlignment = Alignment.BottomEnd,
-                modifier = Modifier.size(110.dp)
-            ) {
+            Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.size(110.dp)) {
                 Box(
                     modifier = Modifier
-                        .size(108.dp)
-                        .clip(CircleShape)
+                        .size(108.dp).clip(CircleShape)
                         .clickable { showAvatarPreview = true }
                         .border(3.dp, if (isPro) ProGold else Color.Transparent, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
+                        model = ImageRequest.Builder(context)
                             .data(avatarUri ?: R.drawable.avt)
-                            .crossfade(true)
-                            .build(),
+                            .crossfade(true).build(),
                         contentDescription = "User Avatar",
                         modifier = Modifier.size(100.dp).clip(CircleShape),
                         contentScale = ContentScale.Crop,
@@ -116,7 +111,6 @@ fun HeaderUserSection(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- PHẦN TÊN & NÚT SỬA ---
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -129,27 +123,19 @@ fun HeaderUserSection(
             }
 
             Text(text = email, fontSize = 14.sp, color = TextGray)
-
             Spacer(modifier = Modifier.height(24.dp))
             HorizontalDivider(color = BgGray, thickness = 2.dp)
             Spacer(modifier = Modifier.height(24.dp))
-
             Text(text = "TOTAL BALANCE", fontSize = 12.sp, color = TextGray, fontWeight = FontWeight.SemiBold)
             Text(text = "$$balance", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue)
         }
     }
 
-    // --- 1. DIALOG XEM ẢNH TO ---
+    // --- 1. DIALOG XEM ẢNH ---
     if (showAvatarPreview) {
-        Dialog(
-            onDismissRequest = { showAvatarPreview = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
+        Dialog(onDismissRequest = { showAvatarPreview = false }) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { showAvatarPreview = false },
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.9f)).clickable { showAvatarPreview = false },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -162,44 +148,33 @@ fun HeaderUserSection(
         }
     }
 
-    // --- 2. DIALOG SỬA THÔNG TIN (Tên & Ảnh) ---
+    // --- 2. DIALOG SỬA ---
     if (showEditDialog) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
             title = { Text("Chỉnh sửa thông tin", fontWeight = FontWeight.Bold) },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Hiển thị ảnh đang chọn thử (Preview ngay trong Dialog)
                     AsyncImage(
-                        model = tempAvatarUri ?: R.drawable.avt,
+                        model = tempAvatarUri ?: avatarUri ?: R.drawable.avt,
                         contentDescription = null,
                         modifier = Modifier.size(80.dp).clip(CircleShape).border(1.dp, BgGray, CircleShape),
                         contentScale = ContentScale.Crop
                     )
-
                     Spacer(modifier = Modifier.height(12.dp))
-
                     OutlinedButton(
-                        onClick = {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                        shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Default.PhotoCamera, null)
                         Spacer(Modifier.width(8.dp))
                         Text("Thay đổi ảnh đại diện")
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
-
                     OutlinedTextField(
                         value = editedName,
                         onValueChange = { editedName = it },
                         label = { Text("Tên hiển thị") },
-                        singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -207,19 +182,34 @@ fun HeaderUserSection(
             },
             confirmButton = {
                 Button(onClick = {
-                    // CHỈ CẬP NHẬT RA NGOÀI KHI NHẤN LƯU
-                    onNameChange(editedName)
-                    onAvatarChange(tempAvatarUri)
+                    val filePath = tempAvatarUri?.let { uri ->
+                        createFileFromUri(context, uri)?.absolutePath
+                    }
+                    onUpdateClick(editedName, filePath) // Truyền về Screen để gọi ViewModel
                     showEditDialog = false
                 }, colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)) {
                     Text("Lưu thay đổi")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) {
-                    Text("Hủy", color = TextGray)
-                }
+                TextButton(onClick = { showEditDialog = false }) { Text("Hủy", color = TextGray) }
             }
         )
+    }
+}
+
+/**
+ * Hàm Helper quan trọng: Copy Uri vào bộ nhớ Cache để có Path thực tế gửi API
+ */
+private fun createFileFromUri(context: Context, uri: Uri): File? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val file = File(context.cacheDir, "temp_profile_${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(file)
+        inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
+        file
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
