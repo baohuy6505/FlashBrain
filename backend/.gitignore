@@ -13,6 +13,10 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+.test.http
+.test.http.*
+.flashcard.http
+.flashcard.http.*
 
 # ==============================
 # LOGS

@@ -1,21 +1,23 @@
 const IDeckService = require('../interfaces/IDeckService');
-const DeckRepository = require('../../infrastructure/interfaces/IDeckRepository');
+// const DeckRepository = require('../../infrastructure/interfaces/IDeckRepository');
+const DeckRepository = require('../../infrastructure/repositories/deckRepository');
 const deckRequestDto = require('../dtos/deck/deckRequestDto');
 const deckResponseDto = require('../dtos/deck/deckResponseDto');
 const { v4: uuidv4 } = require('uuid');
+
 class DeckService extends IDeckService {
     constructor() {
         super();
         this.deckRepository = new DeckRepository();
     }
     async createDeck(deckData) {
-        if(!deckData.name || !deckData.userId) {
+        if(!deckData.title || !deckData.userId) {
             throw new Error("Tên bộ thẻ và ID người dùng là bắt buộc");
         }
         const newDeck = {
             _id: uuidv4(),
             user_id: deckData.userId,
-            title: deckData.name,
+            title: deckData.title,
             is_public: deckData.isPublic || false,
             is_deleted: false
         };
@@ -61,7 +63,7 @@ class DeckService extends IDeckService {
             throw new Error("ID người dùng là bắt buộc");
         }
         const deckUpdate = {
-            title: deckUpdateData.name,
+            title: deckUpdateData.title,
             is_public: deckUpdateData.isPublic
         };
         const updatedDeck = await this.deckRepository.updateById(deckId, userId, deckUpdate);

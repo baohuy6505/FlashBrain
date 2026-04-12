@@ -1,0 +1,101 @@
+### Cấu hình biến môi trường cục bộ
+@baseUrl = http://localhost:3000/api
+# Đăng nhập vào app và copy Token dán vào đây:
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTgxNTIzNywiZXhwIjoxNzc2NDIwMDM3fQ.tQsNXwDIZDD60ephWHC6A9R7XBm6OOCBBNVhWmenKGE
+
+
+### 1. Lấy danh sách bộ bài của User hiện tại
+GET {{baseUrl}}/decks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 2. Tạo một bộ bài (Deck) mới
+POST {{baseUrl}}/decks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Từ vựng IELTS 7.0+",
+    "isPublic": true
+}
+
+### 3. Lỗi: Tạo bộ bài nhưng quên nhập tên (Test validation)
+POST {{baseUrl}}/decks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "",
+    "isPublic": false
+}
+
+### 4. Lấy thông tin chi tiết một bộ bài
+# Bạn hãy copy cái "id" của bộ bài "Từ vựng IELTS" mà bạn vừa tạo ở bước 2 thay vào chữ <ID_CUA_BO_BAI> bên dưới nhé
+GET {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 5. Lỗi: Lấy một bộ bài không tồn tại (Hoặc ID bậy bạ)
+GET {{baseUrl}}/decks/12345678-abcd-1234-abcd-1234567890ab
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 6. Cập nhật thông tin bộ bài (Đổi tên và Public)
+# Thay <ID_CUA_BO_BAI> bằng ID thật của bộ bài bạn muốn sửa
+PUT {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Từ vựng IELTS 8.0+",
+    "isPublic": true
+}
+
+### 7. Lỗi: Cập nhật bộ bài mà không truyền tên (Test validation)
+PUT {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "",
+    "isPublic": false
+}
+
+### 8. Xóa mềm một bộ bài (Cho vào thùng rác)
+# Thay <ID_CUA_BO_BAI> bằng ID bộ bài bạn muốn xóa
+DELETE {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### 9. Lỗi: Cố tình xóa lại bộ bài đã bị xóa
+# Cùng ID ở trên, nhưng chạy lần 2 xem nó có báo lỗi "Không tìm thấy" không nhé
+DELETE {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 10. Khôi phục một bộ bài từ thùng rác
+# Dùng lại cái ID mà bạn vừa "Xóa mềm" ở bài trước nhé
+PATCH {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4/restore
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 11. Lỗi: Cố tình khôi phục một bộ bài đang KHÔNG ở trong thùng rác
+# Cùng ID đó, bấm chạy lần thứ 2 xem nó có chặn lại không
+PATCH {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4/restore
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 12. Xóa vĩnh viễn (Hard Delete) một bộ bài
+# BƯỚC 1: Dùng API số 8 (Soft Delete) để cho 1 bộ bài vào thùng rác trước.
+# BƯỚC 2: Copy ID đó dán vào đây và chạy.
+DELETE {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4/hard
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### 13. Lỗi: Cố tình xóa vĩnh viễn bộ bài đang sử dụng (Chưa cho vào thùng rác)
+# Lấy ID của 1 bộ bài ĐANG BÌNH THƯỜNG (không nằm trong thùng rác) và chạy thử.
+DELETE {{baseUrl}}/decks/6f6c5d1b-3c47-4555-9e26-e8ecd4f2aaf5/hard
+Authorization: Bearer {{token}}
+Content-Type: application/json

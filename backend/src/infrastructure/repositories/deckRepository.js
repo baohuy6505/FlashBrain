@@ -1,5 +1,6 @@
 const IDeckRepository = require("../interfaces/IDeckRepository");
 const DeckModel = require("../../domain/models/Deck");
+
 class DeckRepository extends IDeckRepository {
   async create(deck) {
     const newDeck = new DeckModel(deck);
@@ -34,6 +35,7 @@ class DeckRepository extends IDeckRepository {
       { _id: deckId, user_id: userId },
       { $set: updateData },
       {
+        // returnDocument: 'after', // SỬA 'new: true'
         new: true, // Trả về bản sau khi update (thay vì bản cũ)
         runValidators: true, // Đảm bảo dữ liệu mới vẫn đúng Schema (giống ASP.NET Validation)
       },
@@ -60,6 +62,7 @@ class DeckRepository extends IDeckRepository {
     const deletedDeck = await DeckModel.findOneAndDelete({
       _id: deckId,
       user_id: userId,
+      is_deleted: true // CHỈ CHO PHÉP xóa vĩnh viễn những bộ bài đã nằm trong thùng rác
     });
     return deletedDeck;
   }

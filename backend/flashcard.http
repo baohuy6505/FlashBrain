@@ -1,0 +1,52 @@
+### BƯỚC 0: Nhập Token của bạn vào đây
+@baseUrl = http://localhost:3000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTgxNTIzNywiZXhwIjoxNzc2NDIwMDM3fQ.tQsNXwDIZDD60ephWHC6A9R7XBm6OOCBBNVhWmenKGE
+
+
+
+### BƯỚC 1: Lấy danh sách Deck (để copy 1 cái Deck ID dán xuống dưới)
+GET {{baseUrl}}/decks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### BƯỚC 2: Tạo thẻ Flashcard mới (Thay <DECK_ID_CUA_BAN> bằng ID lấy ở Bước 1)
+POST {{baseUrl}}/flashcards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "deckId": "910bd1eb-5d95-4420-94ff-a5ac7b26ff95",
+    "frontText": "Huy",
+    "backText": "Huy hahaah"
+}
+
+
+### BƯỚC 3: Lấy toàn bộ thẻ Flashcard trong 1 Deck
+GET {{baseUrl}}/flashcards/deck/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### BƯỚC 4: Sửa nội dung của một thẻ
+# Bạn copy ID của THẺ FLASHCARD (không phải ID bộ bài) dán vào đây:
+PUT {{baseUrl}}/flashcards/b32dfa90-6a1a-4f9b-8859-acc6575e35ab
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "frontText": "Hello Bảo Huy",
+    "backText": "đã sửa thành huy biến thái"
+}
+
+
+### 1. Xóa mềm (Cho vào thùng rác)
+DELETE {{baseUrl}}/flashcards/d5a122a5-365f-45cc-8d68-b07a18286e04
+Authorization: Bearer {{token}}
+
+### 2. Khôi phục thẻ từ thùng rác
+PATCH {{baseUrl}}/flashcards/d5a122a5-365f-45cc-8d68-b07a18286e04/restore
+Authorization: Bearer {{token}}
+
+### 3. Xóa vĩnh viễn khỏi Database
+DELETE {{baseUrl}}/flashcards/d5a122a5-365f-45cc-8d68-b07a18286e04/hard
+Authorization: Bearer {{token}}
