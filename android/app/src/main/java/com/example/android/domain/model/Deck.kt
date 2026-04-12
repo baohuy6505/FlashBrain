@@ -6,8 +6,8 @@ data class Deck(
     val title: String,
     val isPublic: Boolean = false,
     val isDeleted: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis(),
+    val createdAt: String,
+    val updatedAt: String,
     val isDirty: Boolean = false, // Đánh dấu cần đồng bộ
-    val serverId: String? = null, // ID từ ASP.NET trả về
+    val serverId: String? = null,
 )

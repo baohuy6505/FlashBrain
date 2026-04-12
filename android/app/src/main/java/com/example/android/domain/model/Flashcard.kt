@@ -10,12 +10,12 @@ data class Flashcard(
     val interval: Int = 0,
     val repetition: Int = 0,
     val easeFactor: Double = 2.5,
-    val nextReviewDate: Long? = null,
+    val nextReviewDate: String? = null,
 
-    val lastReviewedAt: Long? = null,
+    val lastReviewedAt: String? = null,
     val isDeleted: Boolean = false,
-    val createdAt: Long,
-    val updatedAt: Long
+    val createdAt: String,
+    val updatedAt: String
 )
 data class DeckWithCards(
     val deck: Deck,

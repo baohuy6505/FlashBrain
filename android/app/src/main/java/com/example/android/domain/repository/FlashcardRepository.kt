@@ -13,4 +13,8 @@ interface FlashcardRepository {
 
     //xoa the bang id
     suspend fun softDelete(id: String)
+
+    suspend fun syncDirtyCards()
+
+    fun scheduleSync()
 }
