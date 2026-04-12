@@ -19,14 +19,10 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun updateProfile(name: String, imagePath: String?): Result<User> =
         withContext(Dispatchers.IO) {
             try {
-                // ĐỊA CHỈ TOKEN: Copy từ Postman của bạn và dán vào đây
-                // Lưu ý: Phải có chữ "Bearer " và một khoảng trắng trước chuỗi token
                 val myToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTk4Mjk0MCwiZXhwIjoxNzc2NTg3NzQwfQ.mFbKTeJKGqn6uAqz9Sp4PMg-XWudqvs6aacW0n3d6Fs"
 
-                // Chuẩn bị Body cho Name
                 val nameBody = name.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                // Chuẩn bị Body cho Image (nếu có)
                 val imagePart = imagePath?.let { path ->
                     val file = File(path)
                     if (file.exists()) {
@@ -35,7 +31,6 @@ class UserRepositoryImpl @Inject constructor(
                     } else null
                 }
 
-                // Gọi API với Token và dữ liệu
                 val response = authApi.updateProfile(
                     token = myToken,
                     name = nameBody,
@@ -43,10 +38,8 @@ class UserRepositoryImpl @Inject constructor(
                 )
 
                 if (response.isSuccessful && response.body() != null) {
-                    // Trả về dữ liệu User nếu thành công
                     Result.success(response.body()!!.data)
                 } else {
-                    // Trích xuất lỗi từ Server (ví dụ: Token hết hạn, sai đường dẫn...)
                     val errorMsg = response.errorBody()?.string() ?: "Lỗi server: ${response.code()}"
                     Result.failure(Exception(errorMsg))
                 }

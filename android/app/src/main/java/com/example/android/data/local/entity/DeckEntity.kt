@@ -12,6 +12,6 @@ data class DeckEntity(
     val isDeleted: Boolean,
     val isDirty: Boolean,
     val serverId: String?,
-    val createdAt: Long,
-    val updatedAt: Long
+    val createdAt: String,
+    val updatedAt: String
 )

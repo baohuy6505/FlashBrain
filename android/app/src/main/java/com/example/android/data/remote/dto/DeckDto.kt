@@ -7,5 +7,7 @@ data class DeckDto(
     val userId: String,
     val title: String,
     val isPublic: Boolean,
-    val isDeleted: Boolean
+    val isDeleted: Boolean,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )

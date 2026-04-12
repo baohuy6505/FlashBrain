@@ -1,18 +1,22 @@
 package com.example.android.data.repository
 
+import android.content.Context
 import com.example.android.data.local.dao.FlashcardDao
-import com.example.android.data.local.entity.FlashcardEntity
 import com.example.android.data.remote.FlashcardApi
-import com.example.android.domain.model.Deck
+import com.example.android.data.sync.DataSyncManager
+import com.example.android.data.mapper.*
 import com.example.android.domain.model.Flashcard
 import com.example.android.domain.repository.FlashcardRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FlashcardRepositoryImpl @Inject constructor(
     private val flashcardDao: FlashcardDao,
-    private val flashcardApi: FlashcardApi
+    private val flashcardApi: FlashcardApi,
+    private val syncManager: DataSyncManager,
+    @ApplicationContext private val context: Context
 ) : FlashcardRepository {
 
     override fun getCardsByDeck(deckId: String): Flow<List<Flashcard>> =
@@ -20,65 +24,40 @@ class FlashcardRepositoryImpl @Inject constructor(
             entities.map { it.toDomain() }
         }
 
-    // FlashcardRepositoryImpl.kt
     override suspend fun insertOrUpdate(flashcard: Flashcard) {
-        // 1. Lưu vào Room trước (Offline-first)
+        // 1. Lưu Local trước
         flashcardDao.insertOrUpdate(flashcard.toEntity().copy(isDirty = true))
 
-        // 2. Gọi API để lưu lên Server
         try {
-            val testToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYzVmMjllOC0yZDdmLTQ4YzEtODA0OC05OTI3YWNiODk1OTYiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NjAwMzk2MCwiZXhwIjoxNzc2NjA4NzYwfQ.6rAFsJGvJ2JdsYfABR-QUht_3H7QrOpPmMaGeYN9v18"
+            val testToken = "Bearer eyJhbGci..." // Token của Huy
 
-            val response = flashcardApi.createFlashcard(testToken, flashcard.toDto())
+            val response = if (flashcard.repetition == 0 && flashcard.lastReviewedAt == null) {
+                flashcardApi.createFlashcard(testToken, flashcard.toDto())
+            } else {
+                flashcardApi.updateFlashcard(testToken, flashcard.id, flashcard.toDto())
+            }
 
             if (response.isSuccessful) {
-                // 3. Nếu thành công thì bỏ đánh dấu Dirty
                 flashcardDao.insertOrUpdate(flashcard.toEntity().copy(isDirty = false))
-                println("SYNC_OK: Đã lưu lên Node.js thành công!")
+                android.util.Log.d("HUY_DEBUG", "SYNC_OK: Atlas đã cập nhật CARD thành công!")
             } else {
-                // In ra lỗi chi tiết từ server (ví dụ: 400, 401, 500)
-                println("SYNC_FAIL: Server trả về lỗi ${response.code()} - ${response.errorBody()?.string()}")
+                syncManager.scheduleSync()
             }
         } catch (e: Exception) {
-            println("SYNC_ERROR: Không kết nối được Server: ${e.message}")
+            android.util.Log.e("HUY_DEBUG", "LỖI KẾT NỐI CARD: ${e.message}")
+            syncManager.scheduleSync()
         }
     }
 
     override suspend fun softDelete(id: String) {
         flashcardDao.softDelete(id)
     }
+
+    override suspend fun syncDirtyCards() {
+        syncManager.syncFlashcards()
+    }
+
+    override fun scheduleSync() {
+        syncManager.scheduleSync()
+    }
 }
-
-//mapper du lieu giua 2 model
-// Mapper từ Entity (DB) sang Domain (UI)
-fun FlashcardEntity.toDomain() = Flashcard(
-    id = id,
-    deckId = deckId,
-    frontText = frontText,
-    backText = backText,
-    interval = interval,
-    repetition = repetition,
-    easeFactor = easeFactor,
-    nextReviewDate = nextReviewDate,
-    lastReviewedAt = lastReviewedAt,
-    isDeleted = isDeleted,
-    createdAt = createdAt,
-    updatedAt = updatedAt
-)
-
-// Mapper từ Domain (UI) sang Entity (DB)
-fun Flashcard.toEntity() = FlashcardEntity(
-    id = id,
-    deckId = deckId,
-    frontText = frontText,
-    backText = backText,
-    interval = interval,
-    repetition = repetition,
-    easeFactor = easeFactor,
-    nextReviewDate = nextReviewDate,
-    lastReviewedAt = lastReviewedAt,
-    isDeleted = isDeleted,
-    isDirty = false,
-    createdAt = createdAt,
-    updatedAt = updatedAt
-)

@@ -17,4 +17,7 @@ interface FlashcardDao {
 
     @Query("UPDATE flashcards SET isDeleted = 1, updatedAt = :timestamp WHERE id = :id")
     suspend fun softDelete(id: String, timestamp: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM flashcards WHERE isDirty = 1")
+    suspend fun getDirtyCards(): List<FlashcardEntity>
 }

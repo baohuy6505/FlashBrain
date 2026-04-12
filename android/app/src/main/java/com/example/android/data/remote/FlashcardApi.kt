@@ -20,7 +20,14 @@ interface FlashcardApi {
     @POST("api/decks")
     suspend fun createDeck(
         @Header("Authorization") token: String,
-        @Body deck: Map<String, String> // Gửi { "title": "...", "_id": "..." }
+        @Body deck: DeckDto
+    ): Response<ApiResponse<DeckDto>>
+
+    @PUT("api/decks/{id}")
+    suspend fun updateDeck(
+        @Header("Authorization") token: String,
+        @Path("id") id: String,
+        @Body deck: DeckDto
     ): Response<ApiResponse<DeckDto>>
 
     // --- FLASHCARDS ---

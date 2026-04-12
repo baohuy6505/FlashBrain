@@ -26,11 +26,11 @@ data class FlashcardEntity(
     val interval: Int,
     val repetition: Int,
     val easeFactor: Double,
-    val nextReviewDate: Long?,
+    val nextReviewDate: String?,
 
-    val lastReviewedAt: Long?,
+    val lastReviewedAt: String?,
     val isDeleted: Boolean = false,
     val isDirty: Boolean = false, // Phục vụ Sync Node.js
-    val createdAt: Long,
-    val updatedAt: Long
+    val createdAt: String,
+    val updatedAt: String
 )

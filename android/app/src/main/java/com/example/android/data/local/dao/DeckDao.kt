@@ -18,7 +18,9 @@ interface DeckDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdate(deck: DeckEntity)
 
-    // Xóa mềm: Chỉ đánh dấu isDeleted = 1 để sau này đồng bộ lệnh xóa lên server
+    @Query("SELECT * FROM decks WHERE isDirty = 1")
+    suspend fun getDirtyDecks(): List<DeckEntity>
+
     @Query("UPDATE decks SET isDeleted = 1, isDirty = 1, updatedAt = :time WHERE id = :id")
     suspend fun softDelete(id: String, time: Long = System.currentTimeMillis())
 }
