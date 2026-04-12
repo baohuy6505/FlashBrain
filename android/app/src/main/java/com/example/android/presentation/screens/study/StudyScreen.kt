@@ -13,8 +13,10 @@ import com.example.android.presentation.ui.theme.BgGray
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import com.example.android.domain.model.Flashcard
 import com.example.android.presentation.screens.study.StudyViewModel
+import com.example.android.presentation.util.SpeechManager
 
 @Composable
 fun StudyScreen(
@@ -22,19 +24,48 @@ fun StudyScreen(
     viewModel: StudyViewModel = hiltViewModel<StudyViewModel>(),
     onExit: () -> Unit
 ) {
+    //ket noi su dung chuc nang Speech
+    val context = LocalContext.current
+    val speechManager = remember { SpeechManager(context.applicationContext) }
 
-    //Lắng nghe dữ liệu thật từ Database trả về
-    val flashcards: List<Flashcard> by viewModel.cardsToReview.collectAsState(initial = emptyList())
-    val total = flashcards.size
+    //lắng nghe dữ liệu thật từ Database trả về
+    val flashcards by viewModel.cardsToReview.collectAsState()
     var currentIndex by remember { mutableIntStateOf(0) }
+    val total = flashcards.size
+    val safeIndex = currentIndex.coerceIn(0, maxOf(0, flashcards.size - 1))
+    LaunchedEffect(flashcards) {
+        if (flashcards.isEmpty() && viewModel.isLoopingMode.value) {
+            viewModel.resetSession() // Reset để học lại từ đầu
+        }
+        currentIndex = 0
+    }
+
+    //tu dong tat tranh ro ri bo nho
+    DisposableEffect(Unit) {
+        onDispose {
+            speechManager.shutDown()
+        }
+    }
 
     Scaffold(
         topBar = {
             StudyHeader(
-                current = if (total == 0) 0 else currentIndex + 1,
+                current = if (total == 0) 0 else safeIndex + 1,
                 total = total,
                 onBack = onExit
             )
+        },
+        bottomBar = {
+            if (flashcards.isNotEmpty()) {
+               if (flashcards.size >= 10){
+                   StudyActionButtons(
+                       onAnswer = { quality ->
+                           val currentCard = flashcards[safeIndex]
+                           viewModel.answerCard(currentCard, quality)
+                       }
+                   )
+               }
+            }
         },
         containerColor = BgGray
     ) { padding ->
@@ -56,7 +87,8 @@ fun StudyScreen(
                     cards = flashcards, // Dùng dữ liệu thật!
                     onPageChange = { newIndex ->
                         currentIndex = newIndex
-                    }
+                    },
+                    onSpeak = { text -> speechManager.speak(text) }
                 )
             }
         }

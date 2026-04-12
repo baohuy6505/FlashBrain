@@ -21,12 +21,15 @@ import kotlin.math.absoluteValue
 @Composable
 fun StackedFlashcardPager(
     cards: List<Flashcard>,
-    onPageChange: (Int) -> Unit
+    onPageChange: (Int) -> Unit,
+    onSpeak: (String) -> Unit
 ) {
     if (cards.isEmpty()) return
 
     val total = cards.size
     var currentIndex by remember { mutableIntStateOf(0) }
+
+
 
     val offsetX = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
@@ -95,7 +98,10 @@ fun StackedFlashcardPager(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                FlashcardItem(card = cards[incomingIndex])
+                FlashcardItem(
+                    card = cards[incomingIndex],
+                    onSpeak = { onSpeak(it) } // Giả sử FlashcardItem có nhận onSpeak
+                )
             }
         }
 
@@ -112,7 +118,10 @@ fun StackedFlashcardPager(
                 },
             contentAlignment = Alignment.Center
         ) {
-            FlashcardItem(card = cards[currentIndex])
+            FlashcardItem(
+                card = cards[currentIndex],
+                onSpeak = { onSpeak(it) } // Giả sử FlashcardItem có nhận onSpeak
+            )
         }
     }
 }

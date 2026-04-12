@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android.domain.model.Flashcard
 import com.example.android.domain.repository.FlashcardRepository
+import com.example.android.domain.util.SM2Engine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -18,115 +19,48 @@ class StudyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val deckId: String = savedStateHandle.get<String>("deckId") ?: ""
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val cardsToReview: StateFlow<List<Flashcard>> = flow {
+
+    // 1. Quản lý danh sách ID những thẻ đã nhấn nút trong phiên này
+    private val answeredIds = MutableStateFlow<Set<String>>(emptySet())
+
+    private val _isLoopingMode = MutableStateFlow(true)
+    val isLoopingMode: StateFlow<Boolean> = _isLoopingMode.asStateFlow()
+
+    // Trong StudyViewModel.kt
+    val cardsToReview: StateFlow<List<Flashcard>> = combine(
+        flashcardRepository.getCardsByDeck(deckId),
+        answeredIds
+    ) { allCards, answered ->
+        val activeCards = allCards.filter { !it.isDeleted }
         val now = System.currentTimeMillis()
-        if (deckId.isNotEmpty()) {
-            flashcardRepository.getCardsByDeck(deckId).collect { allCards ->
-                val reviewList = allCards.filter {
-                    !it.isDeleted && (it.nextReviewDate ?: 0L) <= now
-                }
-                emit(reviewList)
-            }
+
+        _isLoopingMode.value = activeCards.size < 10
+
+        val remainingCards = if (activeCards.size < 10) {
+            activeCards.filter { it.id !in answered }
         } else {
-            emit(emptyList())
+            activeCards.filter { (it.nextReviewDate ?: 0L) <= now && it.id !in answered }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
 
+        if (remainingCards.isEmpty() && activeCards.isNotEmpty() && activeCards.size < 10) {
+            answeredIds.value = emptySet()
+            activeCards
+        } else {
+            remainingCards
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 4. LOGIC QUAN TRỌNG: Cập nhật thẻ sau khi học (Thuật toán SM-2)
-     * @param quality: Mức độ nhớ (0: Quên hoàn toàn, 1: Khó, 2: Được, 3: Dễ)
-     */
+   //su dung thuat toan SM2
     fun answerCard(card: Flashcard, quality: Int) {
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-
-            // Logic tính toán Interval (Khoảng cách ngày) và EaseFactor (Độ dễ)
-            var newRepetition = card.repetition
-            var newEaseFactor = card.easeFactor
-            var newInterval: Int
-
-            if (quality >= 2) { // Nếu trả lời đúng (Được hoặc Dễ)
-                if (newRepetition == 0) {
-                    newInterval = 1 // Lần đầu đúng: 1 ngày sau xem lại
-                } else if (newRepetition == 1) {
-                    newInterval = 6 // Lần hai đúng: 6 ngày sau xem lại
-                } else {
-                    // Các lần sau: Khoảng cách = Khoảng cách cũ * Độ dễ
-                    newInterval = (card.interval * card.easeFactor).toInt()
-                }
-                newRepetition += 1
-            } else { // Nếu trả lời sai hoặc quá khó
-                newRepetition = 0
-                newInterval = 1
-            }
-
-            // Cập nhật EaseFactor: Điều chỉnh độ khó dựa trên phản hồi của user
-            // Công thức rút gọn của SM-2
-            newEaseFactor += (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02))
-            if (newEaseFactor < 1.3) newEaseFactor = 1.3 // Không để độ dễ thấp quá
-
-            // Tính toán ngày ôn tiếp theo (Đổi Interval từ ngày sang miliseconds)
-            val oneDayMs = 24 * 60 * 60 * 1000L
-            val nextReviewDate = now + (newInterval * oneDayMs)
-
-            // Lưu vào Database
-            val updatedCard = card.copy(
-                repetition = newRepetition,
-                easeFactor = newEaseFactor,
-                interval = newInterval,
-                nextReviewDate = nextReviewDate,
-                lastReviewedAt = now,
-                updatedAt = now
-            )
+           val updatedCard = SM2Engine.calculate(card, quality)
+            println("CHECK_SM2: Card=${card.frontText} | Q=$quality -> Next Interval: ${updatedCard.interval} days")
             flashcardRepository.insertOrUpdate(updatedCard)
+            answeredIds.update { it + card.id }
         }
     }
 
-    //ham thuat toan SM
-//    fun answerCard(card: Flashcard, quality: Int) {
-//        viewModelScope.launch {
-//            val now = System.currentTimeMillis()
-//
-//            var newRepetition = card.repetition
-//            var newEaseFactor = card.easeFactor
-//            var newInterval: Int
-//
-//            if (quality >= 2) { // Trả lời đúng
-//                if (newRepetition == 0) {
-//                    newInterval = 1
-//                } else if (newRepetition == 1) {
-//                    newInterval = 6
-//                } else {
-//                    newInterval = (card.interval * card.easeFactor).toInt()
-//                }
-//                newRepetition += 1
-//            } else { // Trả lời sai
-//                newRepetition = 0
-//                newInterval = 1
-//            }
-//
-//            // Cập nhật EaseFactor (SM-2 Formula)
-//            newEaseFactor += (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02))
-//            if (newEaseFactor < 1.3) newEaseFactor = 1.3
-//
-//            val oneDayMs = 24 * 60 * 60 * 1000L
-//            val nextReviewDate = now + (newInterval * oneDayMs)
-//
-//            val updatedCard = card.copy(
-//                repetition = newRepetition,
-//                easeFactor = newEaseFactor,
-//                interval = newInterval,
-//                nextReviewDate = nextReviewDate,
-//                lastReviewedAt = now,
-//                updatedAt = now
-//            )
-//            flashcardRepository.insertOrUpdate(updatedCard)
-//        }
-//    }
+    fun resetSession() {
+        answeredIds.value = emptySet()
+    }
 }
