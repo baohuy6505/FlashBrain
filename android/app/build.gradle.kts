@@ -2,15 +2,14 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
+    // SỬA: Bỏ "kotlin-kapt", thêm "ksp"
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "com.example.android"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.android"
@@ -32,11 +31,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        // SỬA: Nâng lên Java 17 để tương thích tốt với các thư viện mới
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        // SỬA: Nâng lên Java 17
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -62,26 +63,29 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // 2. Room Database (Lưu trữ Offline-first)
-    val room_version = "2.6.1"
+    // 2. Room Database
+    // SỬA: Cập nhật version theo đúng comment của bạn và đổi sang ksp
+    val room_version = "2.7.0-alpha01"
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
-    // 3. Dagger Hilt (Dependency Injection - Áp dụng Clean Architecture)
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-compiler:2.50")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // 3. Dagger Hilt
+    // SỬA: Đồng bộ version 2.52, đổi tên compiler và dùng ksp
+    implementation("com.google.dagger:hilt-android:2.52")
+    ksp("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0") // Nâng nhẹ lên 1.2.0
 
-    // 4. Navigation Compose (Chuyển màn hình)
+    // 4. Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    // 5. WorkManager (Chạy ngầm nhắc nhở học bài)
+    // 5. WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
-    // 6. ViewModel & Coroutines (Xử lý bất đồng bộ mượt mà)
+    // 6. ViewModel & Coroutines
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.6.0")
+
 }

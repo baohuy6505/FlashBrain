@@ -4,172 +4,147 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.android.presentation.layouts.MainLayout
-import com.example.android.presentation.screens.auth.login.LoginScreen
 import com.example.android.presentation.screens.profile.ProfileScreen
 import com.example.android.presentation.screens.study.StudyScreen
 import com.example.android.presentation.screens.premium.PremiumScreen
 import com.example.android.presentation.screens.auth.register.RegisterScreen
 import com.example.android.presentation.screens.auth.forgot_password.ForgotPasswordScreen
+import com.example.android.presentation.screens.flashcard.DecksScreen
 import com.example.android.presentation.screens.splash.SplashScreen
 import com.example.android.presentation.screens.notification.NotificationScreen
 import com.example.android.presentation.screens.profile.change_password.ChangePasswordScreen
-import com.example.android.presentation.screens.desk.DecksScreen
 import com.example.android.presentation.screens.home.HomeScreen
-
-import com.example.android.presentation.screens.listdesk.FlashcardListScreen
+import com.example.android.presentation.screens.flashcard.FlashcardListScreen
 import com.example.android.presentation.ui.theme.AndroidTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             AndroidTheme(dynamicColor = false) {
-                // 1. Biến quản lý trạng thái hiển thị Splash Screen
-                var isShowSplash by remember { mutableStateOf(true) }
+                val navController = rememberNavController()
 
-                // Quản lý Tab hiện tại
-                var currentTab by remember { mutableIntStateOf(3) }
+                NavHost(
+                    navController = navController,
+                    startDestination = "splash"
+                ) {
 
-                // KIỂM TRA: Mở app lên thì hiện Splash trước
-                if (isShowSplash) {
-                    SplashScreen(
-                        onNavigateNext = {
-                            // Sau 2.5 giây, tự động tắt Splash
-                            isShowSplash = false
-                            // Chuyển tới tab 0 (Màn hình Đăng nhập)
-                            currentTab = 0
-                        }
-                    )
-                }
-                else {
-                    // NHÓM 1: CÁC MÀN HÌNH NẰM TRONG MAIN LAYOUT (Có Bottom Bar)
-                    if (currentTab == 0 || currentTab == 1 || currentTab == 2 || currentTab == 3) {
+                    // ── SPLASH ──────────────────────────────────────────────
+                    composable("splash") {
+                        SplashScreen(onNavigateNext = {
+                            navController.navigate("main_flow") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        })
+                    }
+
+                    // ── MAIN FLOW (có Bottom Bar) ────────────────────────────
+                    composable("main_flow") {
+                        var currentTab by remember { mutableIntStateOf(0) }
+
                         MainLayout(
                             currentTab = currentTab,
                             onTabSelected = { currentTab = it },
                             onNavigateToNotification = {
-                                currentTab = 6 // Chuyển sang màn hình Notification
+                                navController.navigate("notification")
                             },
                             onLogoutClick = {
-                                currentTab = 0 // Đăng xuất thì về Login
+                                navController.navigate("splash") {
+                                    popUpTo(0) { inclusive = true }
+                                }
                             }
                         ) {
                             when (currentTab) {
-//                                0 -> LoginScreen(
-//                                    onNavigateToSignUp = { currentTab = 5 }, // Sang Đăng ký
-//                                    onNavigateToHome = { currentTab = 3 },   // Sang Profile
-//                                    onNavigateToForgotPassword = { currentTab = 4 } // Sang Quên MK
-//                                )
                                 0 -> HomeScreen(
-                                    onNavigateToDecks = {
-                                        currentTab = 1
-                                    }
+                                    onNavigateToDecks = { currentTab = 1 }
                                 )
                                 1 -> DecksScreen(
                                     onDeckClick = { deckId ->
-                                        // TODO: Có thể lưu deckId vào state nếu muốn truyền dữ liệu thật
-                                        currentTab = 8 // Chuyển sang màn hình chi tiết bộ thẻ (FlashcardList)
+                                        navController.navigate("flashcard_list/$deckId")
                                     }
                                 )
                                 2 -> PremiumScreen()
                                 3 -> ProfileScreen(
-                                    onNavigateToChangePassword = { currentTab = 7 }
+                                    onNavigateToChangePassword = {
+                                        navController.navigate("change_password")
+                                    }
                                 )
                             }
                         }
                     }
-                    // NHÓM 2: CÁC MÀN HÌNH ĐỘC LẬP (Không có Bottom Bar)
-                    else {
-                        when (currentTab) {
-                            4 -> ForgotPasswordScreen(
-                                onNavigateBack = { currentTab = 0 }, // Back về Login
-                                onNavigateToLogin = { currentTab = 0 } // Bấm Đăng nhập về Login
-                            )
-                            5 -> RegisterScreen(
-                                onNavigateToLogin = { currentTab = 0 },
-                                onNavigateToHome = { currentTab = 3 }
-                            )
-                            6 -> NotificationScreen(
-                                onNavigateBack = { currentTab = 3 } // Back về Settings (Profile)
-                            )
-                            7 -> ChangePasswordScreen(
-                                onNavigateBack = { currentTab = 3 } // Xong xuôi quay lại tab Profile
-                            )
-                            // CHI TIẾT BỘ THẺ (Tab 8)
-//                            8 -> FlashcardListScreen(
-//                                onBack = { currentTab = 1 }, // Bấm Back quay lại danh sách Decks
-//                                onReviewClick = { currentTab = 9 } // Bấm "Review Now" thì vào màn hình học (Study)
-//                            )
-                            8 -> {
-                                // 1. Tạo mock Deck
-                                val mockDeck = com.example.android.domain.model.Deck(
-                                    id = "1",
-                                    title = "Toán cao cấp",
-                                    userId = "user_123",
-                                    isPublic = true,
 
-                                    isDeleted = false
-                                )
+                    // ── FLASHCARD LIST ───────────────────────────────────────
+                    composable(
+                        route = "flashcard_list/{deckId}",
+                        arguments = listOf(
+                            navArgument("deckId") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getString("deckId").orEmpty()
+                        FlashcardListScreen(
+                            deckId = deckId,
+                            onBack = { navController.popBackStack() },
+                            onReviewClick = { navController.navigate("study/$deckId") }
+                        )
+                    }
 
-                                // 2. TẠO MOCK FLASHCARDS (Thay vì dùng emptyList)
-                                val mockFlashcards = listOf(
-                                    com.example.android.domain.model.Flashcard(
-                                        id = "f1",
-                                        deckId = "1",
-                                        frontText = "Đạo hàm của hàm số f(x) = ln(x) là gì?",
-                                        backText = "f'(x) = 1/x (với x > 0)",
-                                        interval = 0,
-                                        repetition = 0,
-                                        easeFactor = 2.5,
-                                        isDeleted = false
-                                    ),
-                                    com.example.android.domain.model.Flashcard(
-                                        id = "f2",
-                                        deckId = "1",
-                                        frontText = "Tính tích phân bất định: ∫ e^x dx",
-                                        backText = "e^x + C",
-                                        interval = 1,
-                                        repetition = 1,
-                                        easeFactor = 2.6,
-                                        isDeleted = false
-                                    ),
-                                    com.example.android.domain.model.Flashcard(
-                                        id = "f3",
-                                        deckId = "1",
-                                        frontText = "Viết công thức tính diện tích hình phẳng giới hạn bởi đồ thị y=f(x), trục hoành và hai đường thẳng x=a, x=b.",
-                                        backText = "S = ∫|f(x)| dx từ a đến b",
-                                        interval = 3,
-                                        repetition = 2,
-                                        easeFactor = 2.4,
-                                        isDeleted = false
-                                    )
-                                )
+                    // ── STUDY (SM-2) ─────────────────────────────────────────
+                    composable(
+                        route = "study/{deckId}",
+                        arguments = listOf(
+                            navArgument("deckId") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val deckId = backStackEntry.arguments?.getString("deckId").orEmpty()
+                        StudyScreen(
+                            deckId = deckId,
+                            onExit = { navController.popBackStack() }
+                        )
+                    }
 
-                                // 3. Gộp Deck và Flashcards lại
-                                val mockData = com.example.android.domain.model.DeckWithCards(
-                                    deck = mockDeck,
-                                    flashcards = mockFlashcards // Truyền danh sách có dữ liệu vào đây
-                                )
+                    // ── NOTIFICATION ─────────────────────────────────────────
+                    composable("notification") {
+                        NotificationScreen(
+                            onNavigateBack = { navController.popBackStack() } // Đổi từ onBack thành onNavigateBack
+                        )
+                    }
 
-                                FlashcardListScreen(
-                                    data = mockData,
-                                    onBack = { currentTab = 1 },
-                                    onReviewClick = { currentTab = 9 }
-                                )
+// ── CHANGE PASSWORD ──────────────────────────────────────
+                    composable("change_password") {
+                        ChangePasswordScreen(
+                            onNavigateBack = { navController.popBackStack() } // Đổi từ onBack thành onNavigateBack
+                        )
+                    }
+
+// ── FORGOT PASSWORD ──────────────────────────────────────
+                    composable("forgot_password") {
+                        ForgotPasswordScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            onNavigateToLogin = { navController.popBackStack() } // Thêm dòng này để quay về Login
+                        )
+                    }
+
+// ── REGISTER ─────────────────────────────────────────────
+                    composable("register") {
+                        RegisterScreen(
+                            onNavigateToLogin = { navController.popBackStack() }, // Khớp với tham số 1
+                            onNavigateToHome = { // Khớp với tham số 2
+                                navController.navigate("main_flow") {
+                                    popUpTo("register") { inclusive = true }
+                                }
                             }
-                            // MÀN HÌNH HỌC TẬP (Tab 9)
-                            9 -> StudyScreen(
-                                onExit = { currentTab = 8 } // Bấm nút tắt (X) thì quay lại trang chi tiết bộ thẻ
-                            )
-                        }
+                        )
                     }
                 }
             }

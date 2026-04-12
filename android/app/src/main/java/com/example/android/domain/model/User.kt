@@ -4,6 +4,7 @@ data class User(
     val id: String,
     val name: String,
     val email: String,
+    val avatarUrl: String? = null,
     val role: String = "USER",
     val subscriptionType: String = "FREE",
     val balance: Double = 0.0,
