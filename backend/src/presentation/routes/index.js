@@ -1,12 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-
-const deckRoutes = require('./deckRoutes'); 
-const flashcardRoutes = require('./flashcardRoutes')
+const deckRoutes = require("./deckRoutes");
+const flashcardRoutes = require("./flashcardRoutes");
+const authRoutes = require("./authRoutes");
 
 // Sử dụng các route con
-router.use('/decks', deckRoutes);
+router.use("/auth", authRoutes);
 
-router.use('/flashcards', flashcardRoutes);
+// Sử dụng các route con
+router.use("/decks", deckRoutes);
+
+router.use("/flashcards", flashcardRoutes);
 
 module.exports = router;

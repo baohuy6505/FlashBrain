@@ -107,3 +107,6 @@ credentials.json
 *.tgz
 *.bak
 *.swp
+
+node_modules/
+dist/
