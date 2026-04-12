@@ -13,27 +13,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.android.domain.model.Deck
 import com.example.android.presentation.screens.desk.DeckActionBottomSheet
 import com.example.android.presentation.screens.desk.DeckHeader
 import com.example.android.presentation.screens.desk.DeckListItem
 import com.example.android.presentation.screens.desk.DeckSearchBar
+import com.example.android.presentation.screens.desk.DeckViewModel
 
 @Composable
 fun DecksScreen(
     viewModel: DeckViewModel = hiltViewModel(),
     onDeckClick: (String) -> Unit
 ) {
-    //lay danh sach tu VM (da chuyen tu Flow sang State)
     val deckList by viewModel.decksState.collectAsState()
 
+    // 👈 Lấy userId từ ViewModel để truyền xuống BottomSheet
+    val currentUserId = viewModel.currentUserId
+
     var searchQuery by remember { mutableStateOf("") }
-    // State quản lý việc hiển thị BottomSheet và biết đang Sửa hay Tạo mới
     var showSheet by remember { mutableStateOf(false) }
     var deckToEdit by remember { mutableStateOf<Deck?>(null) }
 
@@ -58,14 +58,7 @@ fun DecksScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             if (filteredDecks.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 100.dp)) {
-                        Text("🛸", fontSize = 80.sp)
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text("Vũ trụ này thật trống trải...", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF455A64))
-                        Text("Hãy tạo bộ thẻ để lấp đầy nó nhé!", fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
-                    }
-                }
+                EmptySpaceView()
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -77,8 +70,8 @@ fun DecksScreen(
                             deck = deck,
                             onClick = { onDeckClick(deck.id) },
                             onEdit = {
-                                deckToEdit = deck // Gán bộ thẻ cần sửa
-                                showSheet = true  // Mở sheet
+                                deckToEdit = deck
+                                showSheet = true
                             },
                             onDelete = { viewModel.deleteDeck(deck.id)}
                         )
@@ -90,30 +83,44 @@ fun DecksScreen(
         ExtendedFloatingActionButton(
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 16.dp),
             onClick = {
-                deckToEdit = null // Báo hiệu là tạo mới
+                deckToEdit = null
                 showSheet = true
             },
             containerColor = Color(0xFF2196F3),
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp),
             icon = { Icon(Icons.Default.Add, null) },
-            text = { Text("Thêm Thẻ") }
+            text = { Text("Thêm Bộ Thẻ") }
         )
 
-        // --- HIỂN THỊ BOTTOM SHEET (DÙNG CHUNG CHO THÊM & SỬA) ---
+        // --- HIỂN THỊ BOTTOM SHEET ---
         if (showSheet) {
             DeckActionBottomSheet(
-                existingDeck = deckToEdit, // Nếu null là tạo mới, nếu có data là sửa
+                currentUserId = currentUserId, // 👈 Truyền ID người dùng vào
+                existingDeck = deckToEdit,
                 onDismiss = { showSheet = false },
-                onSave = { savedDeck ->
-                       viewModel.addOrUpdateDeck(
-                           id = deckToEdit?.id,
-                           title = savedDeck.title,
-                           isPublic = savedDeck.isPublic
-                       )
-                    showSheet = false // Đóng sheet
+                onSave = { savedData ->
+                    // 🚀 GỌI HÀM VM MỚI: Truyền nguyên cục deckToEdit để giữ serverId
+                    viewModel.addOrUpdateDeck(
+                        existingDeck = deckToEdit,
+                        title = savedData.title,
+                        isPublic = savedData.isPublic
+                    )
+                    showSheet = false
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun EmptySpaceView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 100.dp)) {
+            Text("🛸", fontSize = 80.sp)
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("Vũ trụ này thật trống trải...", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF455A64))
+            Text("Hãy tạo bộ thẻ để lấp đầy nó nhé!", fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }

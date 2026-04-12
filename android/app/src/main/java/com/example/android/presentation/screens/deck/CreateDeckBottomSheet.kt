@@ -16,18 +16,18 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeckActionBottomSheet(
-    existingDeck: Deck? = null, // null = Tạo mới, có data = Sửa
+    currentUserId: String,
+    existingDeck: Deck? = null,
     onDismiss: () -> Unit,
     onSave: (Deck) -> Unit
 ) {
-    // State lưu trữ Tên và Trạng thái Public/Private
     var deckName by remember { mutableStateOf(existingDeck?.title ?: "") }
     var isPublic by remember { mutableStateOf(existingDeck?.isPublic ?: false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isEditMode = existingDeck != null
 
-    // Kiểm tra xem người dùng có thực sự thay đổi nội dung gì không để bật/tắt nút Lưu
+    // Logic kiểm tra nút Save
     val isNameChanged = deckName.trim() != (existingDeck?.title ?: "")
     val isStatusChanged = isPublic != (existingDeck?.isPublic ?: false)
     val canSave = deckName.isNotBlank() && (!isEditMode || isNameChanged || isStatusChanged)
@@ -54,7 +54,6 @@ fun DeckActionBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- KHUNG NHẬP TÊN ---
             OutlinedTextField(
                 value = deckName,
                 onValueChange = { deckName = it },
@@ -71,7 +70,6 @@ fun DeckActionBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- CÔNG TẮC CHỌN PUBLIC / PRIVATE ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -97,43 +95,44 @@ fun DeckActionBottomSheet(
                     onCheckedChange = { isPublic = it },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        checkedTrackColor = Color(0xFF2196F3),
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color(0xFFD1D5DB),
-                        uncheckedBorderColor = Color.Transparent
+                        checkedTrackColor = Color(0xFF2196F3)
                     )
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- NÚT LƯU / TẠO ---
             Button(
                 onClick = {
                     if (canSave) {
+                        // 👈 Chuyển thời gian sang String để khớp với Model
+                        val currentTime = System.currentTimeMillis().toString()
+
                         if (isEditMode) {
-                            // Cập nhật thẻ cũ
                             val updatedDeck = existingDeck!!.copy(
                                 title = deckName.trim(),
-                                isPublic = isPublic, // Lưu trạng thái mới
-                                updatedAt = System.currentTimeMillis()
+                                isPublic = isPublic,
+                                isDirty = true,
+                                updatedAt = currentTime
                             )
                             onSave(updatedDeck)
                         } else {
-                            // Tạo thẻ mới
                             val newDeck = Deck(
                                 id = UUID.randomUUID().toString(),
-                                userId = "vinh",
+                                userId = currentUserId,
                                 title = deckName.trim(),
-                                isPublic = isPublic, // Lưu trạng thái mới
-                                createdAt = System.currentTimeMillis()
+                                isPublic = isPublic,
+                                isDirty = true,
+                                serverId = null,
+                                createdAt = currentTime,
+                                updatedAt = currentTime
                             )
                             onSave(newDeck)
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                enabled = canSave, // Tự động sáng/tối nút bấm theo logic ở trên
+                enabled = canSave,
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2196F3),

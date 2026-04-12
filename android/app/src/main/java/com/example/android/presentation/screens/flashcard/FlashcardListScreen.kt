@@ -29,11 +29,11 @@ fun FlashcardListScreen(
     onReviewClick: () -> Unit,
     viewModel: FlashcardViewModel = hiltViewModel<FlashcardViewModel>()
 ) {
-    LaunchedEffect(deckId) {
-        if (deckId.isNotEmpty()) {
-            viewModel.setDeckId(deckId)
-        }
-    }
+//    LaunchedEffect(deckId) {
+//        if (deckId.isNotEmpty()) {
+//            viewModel.setDeckId(deckId)
+//        }
+//    }
     val flashcards: List<Flashcard> by viewModel.uiState.collectAsState(initial = emptyList())
     val deck by viewModel.deckInfo.collectAsState(initial = null)
 

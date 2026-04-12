@@ -32,14 +32,15 @@ class StudyViewModel @Inject constructor(
         answeredIds
     ) { allCards, answered ->
         val activeCards = allCards.filter { !it.isDeleted }
-        val now = System.currentTimeMillis()
+        val now = java.time.Instant.now().toString()
 
         _isLoopingMode.value = activeCards.size < 10
-
-        val remainingCards = if (activeCards.size < 10) {
+        val remainingCards = if (_isLoopingMode.value) {
+            // Chế độ Looping: Chỉ lọc những thẻ chưa nhấn nút trong lượt này
             activeCards.filter { it.id !in answered }
         } else {
-            activeCards.filter { (it.nextReviewDate ?: 0L) <= now && it.id !in answered }
+            // Chế độ Học thật: Lọc thẻ đến hạn (String <= String) và chưa nhấn nút
+            activeCards.filter { (it.nextReviewDate ?: "") <= now && it.id !in answered }
         }
 
         if (remainingCards.isEmpty() && activeCards.isNotEmpty() && activeCards.size < 10) {

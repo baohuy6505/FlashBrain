@@ -32,8 +32,11 @@ fun DeckListItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    // --- XỬ LÝ NGÀY THÁNG AN TOÀN ---
+    // Chuyển String -> Long để Date() có thể hiểu được
+    val timestamp = deck.createdAt.toLongOrNull() ?: System.currentTimeMillis()
     val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    val dateString = sdf.format(Date(deck.createdAt))
+    val dateString = sdf.format(Date(timestamp))
 
     Card(
         modifier = Modifier
@@ -51,7 +54,7 @@ fun DeckListItem(
                 .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // --- ICON BOX ---
+            // --- ICON BOX (Huy giữ nguyên phần này vì UI rất đẹp rồi) ---
             Box(
                 modifier = Modifier
                     .size(54.dp)
@@ -121,7 +124,6 @@ fun DeckListItem(
 
             // --- NÚT SỬA & XÓA ---
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Nút Sửa
                 IconButton(
                     onClick = onEdit,
                     modifier = Modifier
@@ -136,10 +138,8 @@ fun DeckListItem(
                     )
                 }
 
-                // KHOẢNG CÁCH GIỮA 2 NÚT (Đã tăng từ 10dp lên 16dp)
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Nút Xóa
                 IconButton(
                     onClick = onDelete,
                     modifier = Modifier

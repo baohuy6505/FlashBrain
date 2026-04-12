@@ -27,13 +27,15 @@ class FlashcardViewModel @Inject constructor(
     private val deckRepository: DeckRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    init {
+        flashcardRepository.scheduleSync()
+    }
     //lay deckId tu Navigation truy cho
     private val deckId: String = savedStateHandle.get<String>("deckId") ?: ""
     // 1. Quản lý ID của bộ thẻ hiện tại
-    private val _currentDeckId = MutableStateFlow("")
+    val deckInfo = if (deckId.isEmpty()) flowOf(null)
 
     // 2. Tự động lấy thông tin Deck mỗi khi ID thay đổi (và khác rỗng)
-    val deckInfo = if (deckId.isEmpty()) flowOf(null)
     else deckRepository.getDeckById(deckId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -44,39 +46,39 @@ class FlashcardViewModel @Inject constructor(
     private val _cardsToReview = MutableStateFlow<List<Flashcard>>(emptyList())
     val cardsToReview = _cardsToReview.asStateFlow()
 
-    // 4. Hàm này được gọi từ LaunchedEffect bên màn hình UI
-    fun setDeckId(id: String) {
-        _currentDeckId.value = id
-    }
+
 
     // 5.thêm và sửa flashcard
     fun addOrUpdateCard(existingCard: Flashcard?, front: String, back: String) {
-        val currentId = _currentDeckId.value
-        if (currentId.isEmpty()) return
+        if (deckId.isEmpty()) {
+            android.util.Log.e("HUY_DEBUG", "Lỗi: deckId từ Navigation bị rỗng!")
+            return
+        }
 
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
+            val nowIso = java.time.Instant.now().toString()
             val flashcard = if(existingCard != null){
                 existingCard.copy(
                     frontText = front,
                     backText = back,
-                    updatedAt = now
+                    updatedAt = java.time.Instant.now().toString(),
                 )
             } else {
                 Flashcard(
                     id = UUID.randomUUID().toString(),
-                    deckId = currentId, //sử dụng currentId ở đây
+                    deckId = deckId, //sử dụng currentId ở đây
                     frontText = front,
                     backText = back,
                     interval = 0,
                     repetition = 0,
                     easeFactor = 2.5,
-                    nextReviewDate = now,
+                    nextReviewDate = nowIso,
                     lastReviewedAt = null,
-                    createdAt = now,
-                    updatedAt = now
+                    createdAt = nowIso, // Kết quả: "2026-04-12T..."
+                    updatedAt = nowIso,
                 )
             }
+            android.util.Log.d("HUY_DEBUG", "Gửi Flashcard với deckId: $deckId")
             flashcardRepository.insertOrUpdate(flashcard)
         }
     }
@@ -90,10 +92,11 @@ class FlashcardViewModel @Inject constructor(
 
     fun loadCardsToReview(deckId: String) {
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
+            val nowIso = java.time.Instant.now().toString()
             flashcardRepository.getCardsByDeck(deckId).collect { allCards ->
                 val reviewList = allCards.filter {
-                    (it.nextReviewDate ?: 0L) <= now && !it.isDeleted
+                    val isDue = it.nextReviewDate != null && it.nextReviewDate <= nowIso
+                    isDue && !it.isDeleted
                 }
                 _cardsToReview.value = reviewList
             }
