@@ -1,5 +1,6 @@
 class deckRequestDto{
     constructor(data) {
+        this.id = data._id || data.id;
         this.title = data.title;
         this.isPublic = data.isPublic || false;
         this.userId = data.userId;

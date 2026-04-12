@@ -1,5 +1,6 @@
 class FlashcardRequestDto {
     constructor(data) {
+        this.id = data._id || data.id;
         this.deckId = data.deckId;
         this.frontText = data.frontText;
         this.backText = data.backText;

@@ -15,7 +15,7 @@ class DeckService extends IDeckService {
             throw new Error("Tên bộ thẻ và ID người dùng là bắt buộc");
         }
         const newDeck = {
-            _id: uuidv4(),
+            _id: deckData.id || uuidv4(),
             user_id: deckData.userId,
             title: deckData.title,
             is_public: deckData.isPublic || false,

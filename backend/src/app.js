@@ -24,10 +24,16 @@ app.get("/test-router", (req, res) => {
     res.send("FlashBrain API running...");
 });
 
-
-
 const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🔥 Server is running in mode: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`Server running on port http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🔥 Server is running!`);
+    console.log(`Local: http://localhost:${PORT}`);
+    // In ra địa chỉ IP thật để Huy dễ copy
+    console.log(`Network: http://192.168.1.47:${PORT}`); 
 });
+
+// const PORT = 3000;
+// app.listen(PORT, () => {
+//     console.log(`🔥 Server is running in mode: ${process.env.NODE_ENV || 'development'}`);
+//     console.log(`Server running on port http://localhost:${PORT}`);
+// });

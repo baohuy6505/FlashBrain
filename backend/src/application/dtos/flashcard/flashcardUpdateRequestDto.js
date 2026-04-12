@@ -2,6 +2,10 @@ class FlashcardUpdateRequestDto {
     constructor(data) {
         this.frontText = data.frontText;
         this.backText = data.backText;
+        this.interval = data.interval;
+        this.repetition = data.repetition;
+        this.easeFactor = data.easeFactor;
+        this.nextReviewDate = data.nextReviewDate;
     }
 
     async validate() {
