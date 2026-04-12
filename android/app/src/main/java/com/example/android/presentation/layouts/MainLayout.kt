@@ -1,9 +1,7 @@
 package com.example.android.presentation.layouts
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,31 +18,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.android.R
+import com.example.android.domain.model.User
 import com.example.android.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 
-// --- HÀM BỌC CHÍNH (MAIN WRAPPER) ---
 @Composable
 fun MainLayout(
     currentTab: Int,
+    user: User?,
     onTabSelected: (Int) -> Unit,
     onNavigateToNotification: () -> Unit,
-    onLogoutClick: () -> Unit = {}, // Callback đăng xuất
+    onLogoutClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val tabTitles = listOf("Home", "Decks", "Premium", "Settings")
     val currentTitle = tabTitles.getOrElse(currentTab) { "" }
 
-    // 1. Quản lý trạng thái Drawer
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Hàm đóng drawer và chuyển tab
     val navigateAndClose = { tabIndex: Int ->
         scope.launch {
             drawerState.close()
@@ -52,7 +49,6 @@ fun MainLayout(
         }
     }
 
-    // 2. Bọc toàn bộ trong ModalNavigationDrawer
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -60,15 +56,15 @@ fun MainLayout(
                 drawerContainerColor = Color.White,
                 modifier = Modifier.width(300.dp)
             ) {
-                // Tiêu đề / User Info trên Drawer
+                // Header Drawer: Hiển thị thông tin USER THẬT
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(BgGray)
                         .padding(24.dp)
                 ) {
-                    Image(
-                            painter = painterResource(id = R.drawable.avt),
+                    AsyncImage(
+                        model = user?.image ?: R.drawable.avt,
                         contentDescription = "Avatar",
                         modifier = Modifier
                             .size(64.dp)
@@ -77,13 +73,21 @@ fun MainLayout(
                         contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Xuân Trung", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextBlack)
-                    Text("xuan@example.com", fontSize = 14.sp, color = TextGray)
+                    Text(
+                        text = user?.name ?: "Người dùng",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
+                    )
+                    Text(
+                        text = user?.email ?: "example@mail.com",
+                        fontSize = 14.sp,
+                        color = TextGray
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Các Menu Items
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
                     label = { Text("Home") },
@@ -113,7 +117,10 @@ fun MainLayout(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp), color = BgGray)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                    color = BgGray
+                )
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.Notifications, contentDescription = null) },
@@ -132,13 +139,12 @@ fun MainLayout(
                     icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null) },
                     label = { Text("Help & Support") },
                     selected = false,
-                    onClick = { /* TODO */ },
+                    onClick = { },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Nút Đăng xuất ở dưới cùng
                 NavigationDrawerItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color.Red) },
                     label = { Text("Logout", color = Color.Red) },
@@ -156,9 +162,10 @@ fun MainLayout(
             topBar = {
                 CommonTopBar(
                     title = currentTitle,
+                    user = user,
                     isSettingsTab = currentTab == 3,
                     onNotificationClick = onNavigateToNotification,
-                    onMenuClick = { scope.launch { drawerState.open() } } // 3. Mở drawer khi bấm menu
+                    onMenuClick = { scope.launch { drawerState.open() } }
                 )
             },
             bottomBar = {
@@ -173,14 +180,14 @@ fun MainLayout(
     }
 }
 
-// --- THANH ĐIỀU HƯỚNG TRÊN (TOP BAR) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonTopBar(
     title: String,
+    user: User?,
     isSettingsTab: Boolean,
     onNotificationClick: () -> Unit,
-    onMenuClick: () -> Unit // Nhận sự kiện mở menu
+    onMenuClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -192,7 +199,7 @@ fun CommonTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onMenuClick) { // Gắn sự kiện vào đây
+            IconButton(onClick = onMenuClick) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextBlack)
             }
         },
@@ -209,10 +216,12 @@ fun CommonTopBar(
                         .border(width = 1.5.dp, color = ProGold, shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.avt),
+                    AsyncImage(
+                        model = user?.image ?: R.drawable.avt,
                         contentDescription = "Small Avatar",
-                        modifier = Modifier.size(36.dp).clip(CircleShape),
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 }
@@ -222,7 +231,6 @@ fun CommonTopBar(
     )
 }
 
-// ... (CommonBottomNavigation giữ nguyên như cũ) ...
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(

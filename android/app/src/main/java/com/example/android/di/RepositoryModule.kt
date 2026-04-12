@@ -1,11 +1,11 @@
 package com.example.android.di
 
 import com.example.android.data.repository.DeckRepositoryImpl
-import com.example.android.domain.repository.DeckRepository
 import com.example.android.data.repository.FlashcardRepositoryImpl
-import com.example.android.domain.model.Flashcard
+import com.example.android.data.repository.UserRepositoryImpl
+import com.example.android.domain.repository.DeckRepository
 import com.example.android.domain.repository.FlashcardRepository
-
+import com.example.android.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,11 +20,17 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindDeckRepository(
         deckRepositoryImpl: DeckRepositoryImpl
-    ): DeckRepository // Trả về Interface nhưng thực tế là Implementation
+    ): DeckRepository
 
     @Binds
     @Singleton
     abstract fun bindFlashcardRepository(
-        FlashcardRepositoryImpl: FlashcardRepositoryImpl
+        flashcardRepositoryImpl: FlashcardRepositoryImpl
     ): FlashcardRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(
+        userRepositoryImpl: UserRepositoryImpl
+    ): UserRepository
 }

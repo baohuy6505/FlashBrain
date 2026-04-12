@@ -6,12 +6,18 @@ import javax.inject.Singleton
 
 @Singleton
 class SessionManager @Inject constructor() {
-    //hiện tại ta hardcode thông tin Huy ở đây
+    // Để var để có thể cập nhật giá trị mới
     var currentUser: User? = User(
-        id = "huy_id_001", // Đây là ID sẽ dùng chung cho mọi Deck/Flashcard
+        id = "huy_id_001",
         email = "baohuy6505@gmail.com",
-        name = "Nguyễn Bảo Huy"
+        name = "Nguyễn Bảo Huy",
+        subscriptionType = "PREMIUM",
+        balance = 1240.50
     )
 
-    fun isLoggedIn(): Boolean = currentUser != null
+    fun fetchUser(): User? = currentUser
+
+    fun saveUser(user: User) {
+        this.currentUser = user
+    }
 }
