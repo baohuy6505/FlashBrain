@@ -43,7 +43,7 @@ object NetworkModule {
             .create()
 
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.14:3000/") // Đúng chuẩn cho Emulator
+            .baseUrl("https://flashbrain.onrender.com/") // Đúng chuẩn cho Emulator
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
