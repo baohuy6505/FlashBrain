@@ -17,6 +17,8 @@ pnpm-debug.log*
 .test.http.*
 .flashcard.http
 .flashcard.http.*
+.statistic.http
+.statistic.http.*
 
 # ==============================
 # LOGS

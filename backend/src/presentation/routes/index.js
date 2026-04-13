@@ -5,7 +5,7 @@ const flashcardRoutes = require("./flashcardRoutes");
 const authRoutes = require("./authRoutes");
 const statisticRoutes = require("./statisticRoutes");
 const userProgressRoutes = require("./userProgressRoutes");
-
+const notificationRoutes = require('./notificationRoutes')
 
 // Sử dụng các route con
 router.use("/auth", authRoutes);
@@ -17,6 +17,7 @@ router.use("/flashcards", flashcardRoutes);
 
 router.use("/statistics", statisticRoutes);
 
+router.use("/notifications", notificationRoutes);
 
 router.use("/progress", userProgressRoutes);
 
