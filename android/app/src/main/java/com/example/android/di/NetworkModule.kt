@@ -2,6 +2,7 @@ package com.example.android.di
 
 import com.example.android.data.remote.AuthApi
 import com.example.android.data.remote.FlashcardApi
+import com.example.android.data.remote.NotificationApi
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -52,5 +53,12 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
+        return retrofit.create(NotificationApi::class.java) // 👈 Hilt sẽ tạo Api từ Retrofit
     }
 }

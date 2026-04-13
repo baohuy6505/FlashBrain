@@ -23,6 +23,7 @@ fun NotificationHeader(onBackClick: () -> Unit, onMarkAllRead: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

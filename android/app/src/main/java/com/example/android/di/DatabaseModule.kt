@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.android.data.local.AppDatabase
 import com.example.android.data.local.dao.DeckDao
 import com.example.android.data.local.dao.FlashcardDao
+import com.example.android.data.local.dao.NotificationDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +39,11 @@ object DatabaseModule {
     @Provides
     fun provideFlashcardDao(database: AppDatabase): FlashcardDao {
         return database.flashcardDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationDao(database: AppDatabase): NotificationDao {
+        return database.notificationDao()
     }
 }

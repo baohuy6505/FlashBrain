@@ -1,16 +1,25 @@
 package com.example.android
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.android.data.worker.NotificationWorker
+import com.example.android.domain.repository.NotificationRepository
 import com.example.android.presentation.layouts.MainLayout
 import com.example.android.presentation.screens.profile.ProfileScreen
 import com.example.android.presentation.screens.profile.ProfileViewModel
@@ -26,11 +35,23 @@ import com.example.android.presentation.screens.home.HomeScreen
 import com.example.android.presentation.screens.flashcard.FlashcardListScreen
 import com.example.android.presentation.ui.theme.AndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var notificationRepository: NotificationRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
+        //kich hoat nhac hoc hang ngay
+        lifecycleScope.launch {
+            notificationRepository.scheduleDailyReminder()
+        }
+
         enableEdgeToEdge()
 
         setContent {
