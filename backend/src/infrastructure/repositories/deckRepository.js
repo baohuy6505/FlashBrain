@@ -8,7 +8,7 @@ class DeckRepository extends IDeckRepository {
     async getAllDecksByUserId(userId) {
         // Logic to retrieve all decks for a specific user from the database
     }
-    async getPublicDecks() {
+    async getPublicDecks() {  
         // Logic to retrieve all public decks from the database
     }
     async updateDeck(deckId, deckUpdate) {

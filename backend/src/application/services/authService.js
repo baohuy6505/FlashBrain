@@ -5,6 +5,10 @@ const userRepository = require('../../infrastructure/repositories/userRepository
 const UserProfileResponseDto = require('../../application/dtos/authDto/userProfileResponseDto');
 const { generateToken } = require('../utils/jwt');
 const cloudinary = require('cloudinary').v2;
+const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
+
+    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const getPublicIdFromUrl = (url) => {
     try {
@@ -19,6 +23,56 @@ const getPublicIdFromUrl = (url) => {
 };
 
 class AuthService extends IAuthService {
+  
+
+    async googleLogin(idToken) {
+        if (!idToken) {
+            throw new Error("Vui lòng cung cấp Google ID Token");
+        }
+
+        try {
+            const ticket = await googleClient.verifyIdToken({
+                idToken: idToken,
+                audience: process.env.GOOGLE_CLIENT_ID,  
+                // Lưu ý: audience phải khớp với cái GOOGLE_CLIENT_ID trong .env
+            });
+
+            const payload = ticket.getPayload();
+            const { email, name, picture } = payload;
+
+            let user = await userRepository.findByEmail(email);
+
+            if (!user) {
+                const randomPassword = crypto.randomBytes(16).toString('hex');
+                const passwordHash = await bcrypt.hash(randomPassword, 10);
+
+                user = await userRepository.create({
+                    _id: uuidv4(),
+                    email: email,
+                    name: name,
+                    image: picture,
+                    passwordHash: passwordHash
+                });
+            } else {
+                if ((!user.image || user.image === "") && picture) {
+                    await userRepository.updateUser(user._id, { image: picture });
+                    user.image = picture;
+                }
+            }
+
+            const token = generateToken({ 
+                userId: user._id, 
+                role: user.role 
+            });
+
+            return { token, isNewUser: !user }
+
+        } catch (error) {
+            console.error("Lỗi xác thực Google:", error.message);
+            throw new Error("Token Google không hợp lệ hoặc đã hết hạn!");
+        }
+    }
+
     async register(registerDto) {
         
         const { email, password, name } = registerDto;
