@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentNavigableMap
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
     onNavigateToDecks: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -52,6 +52,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF8F9FA))
+                .padding(innerPadding)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -61,36 +62,54 @@ fun HomeScreen(
             item { StreakCard(state) }
 
             // 3. Thẻ lịch học hôm nay
-            item { ScheduleCard(
-                reviewCount = state.reviewCardCount,
-                onReviewClick = onNavigateToDecks
-                ) }
+//            item { ScheduleCard(
+//                reviewCount = state.reviewCardCount,
+//                onReviewClick = onNavigateToDecks
+//                ) }
 
             // 4. Mục My Decks Header
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("My Decks", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                    Text("View All >", color = Color(0xFF1976D2), style = MaterialTheme.typography.bodySmall)
-                }
-            }
+//            item {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Text("My Decks", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+//                    Text("View All >", color = Color(0xFF1976D2), style = MaterialTheme.typography.bodySmall)
+//                }
+//            }
 
-            // 5. Danh sách ngang các Deck
+//            // 5. Danh sách ngang các Deck
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(state.recentDecks) { deck ->
+                    items(dummyDecks) { deck ->
                         DeckItemHorizontal(deck)
                     }
                 }
             }
-
-            // 6. Weekly bieu do tuan: -> Them True khi ma >50
+// 6. Weekly biểu đồ tuần
+            // 6. Weekly biểu đồ tuần
             item {
-                WeeklyStatsCard(state = state)
+                // Tạo một State giả chứa các con số đẹp để demo
+                val mockStateForChart = state.copy(
+                    weeklyStats = listOf(
+                        WeeklyStat("T2", 5, false),
+                        WeeklyStat("T3", 12, false),
+                        WeeklyStat("T4", 8, false),
+                        WeeklyStat("T5", 15, false),
+                        WeeklyStat("T6", 20, false),
+                        WeeklyStat("T7", 5, false),
+                        WeeklyStat("CN", 2, true)
+                    )
+                )
+
+                // Truyền cái State giả này vào là xong, không lỗi gạch đỏ!
+                WeeklyStatsCard(state = mockStateForChart)
             }
+            // 6. Weekly bieu do tuan: -> Them True khi ma >50
+//            item {
+//                WeeklyStatsCard(state = state)
+//            }
 
             // 7. Pro Banner
             item {

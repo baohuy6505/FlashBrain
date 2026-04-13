@@ -1,13 +1,14 @@
 package com.example.android.presentation.screens.profile.components.profile_setting
 
-
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -37,7 +38,7 @@ fun GeneralSettingsSection() {
 @Composable
 fun AccountSettingsSection(
     onChangePasswordClick: () -> Unit,
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier.padding(horizontal = 16.dp),

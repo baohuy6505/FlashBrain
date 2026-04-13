@@ -27,6 +27,7 @@ import com.example.android.domain.model.User
 import com.example.android.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun MainLayout(
     currentTab: Int,
@@ -56,7 +57,7 @@ fun MainLayout(
                 drawerContainerColor = Color.White,
                 modifier = Modifier.width(300.dp)
             ) {
-                // Header Drawer: Hiển thị thông tin USER THẬT
+                // Header Drawer: Thông tin người dùng
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -88,29 +89,30 @@ fun MainLayout(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Các mục điều hướng chính
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Dashboard, null) },
                     label = { Text("Home") },
                     selected = currentTab == 0,
                     onClick = { navigateAndClose(0) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.ViewCarousel, contentDescription = null) },
+                    icon = { Icon(Icons.Default.ViewCarousel, null) },
                     label = { Text("My Decks") },
                     selected = currentTab == 1,
                     onClick = { navigateAndClose(1) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ProGold) },
+                    icon = { Icon(Icons.Default.AutoAwesome, null, tint = ProGold) },
                     label = { Text("Premium", color = ProGold, fontWeight = FontWeight.Bold) },
                     selected = currentTab == 2,
                     onClick = { navigateAndClose(2) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Person, null) },
                     label = { Text("Settings") },
                     selected = currentTab == 3,
                     onClick = { navigateAndClose(3) },
@@ -122,8 +124,9 @@ fun MainLayout(
                     color = BgGray
                 )
 
+                // Các mục hỗ trợ
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Outlined.Notifications, contentDescription = null) },
+                    icon = { Icon(Icons.Outlined.Notifications, null) },
                     label = { Text("Notifications") },
                     selected = false,
                     onClick = {
@@ -136,7 +139,7 @@ fun MainLayout(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, null) },
                     label = { Text("Help & Support") },
                     selected = false,
                     onClick = { },
@@ -145,13 +148,16 @@ fun MainLayout(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                // Nút Đăng xuất (Logout)
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color.Red) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, null, tint = Color.Red) },
                     label = { Text("Logout", color = Color.Red) },
                     selected = false,
                     onClick = {
-                        scope.launch { drawerState.close() }
-                        onLogoutClick()
+                        scope.launch {
+                            drawerState.close()
+                            onLogoutClick()
+                        }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
                 )
@@ -180,6 +186,9 @@ fun MainLayout(
     }
 }
 
+/**
+ * Thanh công cụ phía trên (TopBar)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonTopBar(
@@ -231,6 +240,9 @@ fun CommonTopBar(
     )
 }
 
+/**
+ * Thanh điều hướng phía dưới (BottomBar)
+ */
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(

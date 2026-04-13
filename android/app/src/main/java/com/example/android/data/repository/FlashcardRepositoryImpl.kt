@@ -11,11 +11,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
+import android.util.Log // 👈 Kiểm tra dòng này
 class FlashcardRepositoryImpl @Inject constructor(
     private val flashcardDao: FlashcardDao,
     private val flashcardApi: FlashcardApi,
     private val syncManager: DataSyncManager,
+    private val sessionManager: com.example.android.data.local.SessionManager,
     @ApplicationContext private val context: Context
 ) : FlashcardRepository {
 
@@ -29,12 +30,14 @@ class FlashcardRepositoryImpl @Inject constructor(
         flashcardDao.insertOrUpdate(flashcard.toEntity().copy(isDirty = true))
 
         try {
-            val testToken = "Bearer eyJhbGci..." // Token của Huy
+            val token = sessionManager.authToken?.let {
+                if (it.startsWith("Bearer ")) it else "Bearer $it"
+            } ?: return
 
             val response = if (flashcard.repetition == 0 && flashcard.lastReviewedAt == null) {
-                flashcardApi.createFlashcard(testToken, flashcard.toDto())
+                flashcardApi.createFlashcard(token, flashcard.toDto())
             } else {
-                flashcardApi.updateFlashcard(testToken, flashcard.id, flashcard.toDto())
+                flashcardApi.updateFlashcard(token, flashcard.id, flashcard.toDto())
             }
 
             if (response.isSuccessful) {
@@ -59,5 +62,27 @@ class FlashcardRepositoryImpl @Inject constructor(
 
     override fun scheduleSync() {
         syncManager.scheduleSync()
+    }
+
+    // Thêm vào FlashcardRepositoryImpl
+    override suspend fun fetchCardsFromServer(deckId: String) {
+        try {
+            val token = sessionManager.authToken?.let {
+                if (it.startsWith("Bearer ")) it else "Bearer $it"
+            } ?: return
+
+            val response = flashcardApi.getFlashcardsByDeck(token, deckId)
+            if (response.isSuccessful) {
+                val remoteCards = response.body()?.data ?: emptyList()
+
+                remoteCards.forEach { dto ->
+                    // Lưu vào Room và đánh dấu là dữ liệu sạch (isDirty = false)
+                    flashcardDao.insertOrUpdate(dto.toEntity().copy(isDirty = false))
+                }
+                Log.d("HUY_DEBUG", "PULL_CARDS_OK: Đã tải ${remoteCards.size} thẻ của Deck $deckId")
+            }
+        } catch (e: Exception) {
+            Log.e("HUY_DEBUG", "LỖI PULL_CARDS: ${e.message}")
+        }
     }
 }

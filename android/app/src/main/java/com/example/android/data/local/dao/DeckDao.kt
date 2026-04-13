@@ -23,4 +23,6 @@ interface DeckDao {
 
     @Query("UPDATE decks SET isDeleted = 1, isDirty = 1, updatedAt = :time WHERE id = :id")
     suspend fun softDelete(id: String, time: Long = System.currentTimeMillis())
+
+
 }

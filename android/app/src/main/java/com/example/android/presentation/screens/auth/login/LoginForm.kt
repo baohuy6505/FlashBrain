@@ -16,21 +16,24 @@ import com.example.android.presentation.ui.theme.PrimaryBlue
 
 @Composable
 fun LoginForm(
-    onLoginClick: (String, String) -> Unit,
-    onForgotPasswordClick: () -> Unit
+    email: String,                   // Lấy từ ViewModel
+    onEmailChange: (String) -> Unit, // Đẩy về ViewModel
+    password: String,                // Lấy từ ViewModel
+    onPasswordChange: (String) -> Unit, // Đẩy về ViewModel
+    onLoginClick: () -> Unit,        // Gọi hàm của ViewModel
+    onForgotPasswordClick: () -> Unit,
+    isLoading: Boolean               // Trạng thái chờ
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = "Email", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = onEmailChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
+            enabled = !isLoading, // Khóa ô nhập khi đang đăng nhập
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.LightGray,
                 focusedBorderColor = Color(0xFF1E1E2C)
@@ -43,10 +46,11 @@ fun LoginForm(
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = onPasswordChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
+            enabled = !isLoading, // Khóa ô nhập khi đang đăng nhập
             visualTransformation = PasswordVisualTransformation(),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.LightGray,
@@ -63,21 +67,30 @@ fun LoginForm(
             color = Color(0xFF1E1E2C),
             modifier = Modifier
                 .align(Alignment.End)
-                .clickable { onForgotPasswordClick() }
+                .clickable(enabled = !isLoading) { onForgotPasswordClick() }
                 .padding(vertical = 8.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedButton(
-            onClick = { onLoginClick(email, password) },
+        Button( // Đổi sang Button chính để hiện trạng thái Loading rõ hơn
+            onClick = onLoginClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
+            enabled = !isLoading, // Vô hiệu hóa nút khi đang xử lý
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue)
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
         ) {
-            Text("Đăng nhập", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Đăng nhập", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
         }
     }
 }

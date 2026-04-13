@@ -9,11 +9,12 @@ import com.example.android.domain.repository.DeckRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
+import android.util.Log // 👈 Kiểm tra dòng này
 class DeckRepositoryImpl @Inject constructor(
     private val deckDao: DeckDao,
     private val flashcardApi: FlashcardApi,
-    private val syncManager: DataSyncManager // 👈 Thêm Manager vào đây
+    private val syncManager: DataSyncManager,
+    private val sessionManager: com.example.android.data.local.SessionManager
 ): DeckRepository {
 
     override val allDecks: Flow<List<Deck>> = deckDao.getDecks().map { entities ->
@@ -30,10 +31,12 @@ class DeckRepositoryImpl @Inject constructor(
         deckDao.insertOrUpdate(deck.toEntity().copy(isDirty = true))
 
         try {
-            val testToken = "Bearer eyJhbGci..." // Token của Huy
+            val token = sessionManager.authToken?.let {
+                if (it.startsWith("Bearer ")) it else "Bearer $it"
+            } ?: return
 
             // Chuyển sang DTO và gửi
-            val response = flashcardApi.createDeck(testToken, deck.toDto())
+            val response = flashcardApi.createDeck(token, deck.toDto())
 
             if (response.isSuccessful) {
                 // 2. Thành công -> Tắt cờ Dirty
@@ -49,7 +52,28 @@ class DeckRepositoryImpl @Inject constructor(
             syncManager.scheduleSync()
         }
     }
+    // Thêm vào DeckRepositoryImpl
+    override suspend fun fetchDecksFromServer() {
+        try {
+            val token = sessionManager.authToken?.let {
+                if (it.startsWith("Bearer ")) it else "Bearer $it"
+            } ?: return
 
+            val response = flashcardApi.getAllDecks(token) // Đảm bảo FlashcardApi đã có hàm này
+            if (response.isSuccessful) {
+                val remoteDecks = response.body()?.data ?: emptyList()
+
+                // Chuyển DTO sang Entity và lưu vào Room
+                remoteDecks.forEach { dto ->
+                    // isDirty = false vì dữ liệu này vừa lấy từ Server về, đã khớp 100%
+                    deckDao.insertOrUpdate(dto.toEntity().copy(isDirty = false))
+                }
+                Log.d("HUY_DEBUG", "PULL_DECKS_OK: Đã tải ${remoteDecks.size} bộ thẻ về máy.")
+            }
+        } catch (e: Exception) {
+            Log.e("HUY_DEBUG", "LỖI PULL_DECKS: ${e.message}")
+        }
+    }
     override suspend fun deleteDeck(id: String) {
         deckDao.softDelete(id)
     }

@@ -33,7 +33,7 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`🔥 Server is running!`);
     console.log(`Local: http://localhost:${PORT}`);
     // In ra địa chỉ IP thật để Huy dễ copy
-    console.log(`Network: http://192.168.1.47:${PORT}`); 
+    console.log(`Network:  http://192.168.1.14:${PORT}`); 
 });
 
 // const PORT = 3000;

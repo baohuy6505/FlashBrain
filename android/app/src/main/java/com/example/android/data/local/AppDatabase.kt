@@ -16,7 +16,8 @@ import com.example.android.data.local.entity.UserEntity
         FlashcardEntity::class,
         DeckEntity::class,
         UserEntity::class,
-        NotificationEntity::class
+        NotificationEntity::class,
+        com.example.android.data.local.entity.UserProgressEntity::class
                ],
     version = 1,
     exportSchema = false
@@ -28,4 +29,5 @@ abstract class AppDatabase : RoomDatabase()
     abstract fun flashcardDao(): FlashcardDao
     abstract fun deckDao(): DeckDao
     abstract fun notificationDao(): NotificationDao
+    abstract fun userProgressDao(): com.example.android.data.local.dao.UserProgressDao // 2. Thêm hàm này
 }

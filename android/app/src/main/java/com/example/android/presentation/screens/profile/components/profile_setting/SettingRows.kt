@@ -1,6 +1,5 @@
 package com.example.android.presentation.screens.profile.components.profile_setting
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,6 +49,25 @@ fun SettingRowBase(
 }
 
 @Composable
+fun SettingRowClickable(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    isWarning: Boolean = false,
+    onClick: () -> Unit
+) {
+    SettingRowBase(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        isWarning = isWarning,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        if (!isWarning) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = TextGray)
+    }
+}
+
+@Composable
 fun SettingRowSwitch(icon: ImageVector, title: String, subtitle: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     SettingRowBase(icon = icon, title = title, subtitle = subtitle) {
         Switch(checked = checked, onCheckedChange = onCheckedChange, colors = SwitchDefaults.colors(checkedTrackColor = PrimaryBlue))
@@ -59,33 +77,9 @@ fun SettingRowSwitch(icon: ImageVector, title: String, subtitle: String, checked
 @Composable
 fun SettingRowValue(icon: ImageVector, title: String, subtitle: String, value: String, hasNavIcon: Boolean = false) {
     SettingRowBase(icon = icon, title = title, subtitle = subtitle) {
-        Surface(color = BgGray, shape = RoundedCornerShape(12.dp), modifier = Modifier.wrapContentWidth()) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-                Text(text = value, color = TextGray, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                if (hasNavIcon) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = TextGray, modifier = Modifier.size(16.dp))
-                }
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = value, color = TextGray, fontSize = 14.sp)
+            if (hasNavIcon) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = TextGray)
         }
-    }
-}
-
-@Composable
-fun SettingRowClickable(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    isWarning: Boolean = false,
-    onClick: () -> Unit = {}
-) {
-    SettingRowBase(
-        icon = icon,
-        title = title,
-        subtitle = subtitle,
-        isWarning = isWarning,
-        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onClick() }
-    ) {
-        if (!isWarning) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = TextGray)
     }
 }

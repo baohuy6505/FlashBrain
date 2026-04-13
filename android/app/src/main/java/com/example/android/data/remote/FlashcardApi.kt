@@ -13,7 +13,7 @@ import retrofit2.Response
 interface FlashcardApi {
     // --- DECKS ---
     @GET("api/decks")
-    suspend fun getDecks(
+    suspend fun getAllDecks(
         @Header("Authorization") token: String
     ): Response<ApiResponse<List<DeckDto>>>
 
@@ -32,7 +32,7 @@ interface FlashcardApi {
 
     // --- FLASHCARDS ---
     @GET("api/flashcards/deck/{deckId}")
-    suspend fun getCardsByDeck(
+    suspend fun getFlashcardsByDeck(
         @Header("Authorization") token: String,
         @Path("deckId") deckId: String
     ): Response<ApiResponse<List<FlashcardDto>>>

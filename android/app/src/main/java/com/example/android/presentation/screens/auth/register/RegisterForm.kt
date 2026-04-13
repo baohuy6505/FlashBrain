@@ -19,11 +19,17 @@ import com.example.android.presentation.ui.theme.PrimaryBlue
 
 @Composable
 fun RegisterForm(
-    onRegisterClick: (String, String, String) -> Unit
+    // Đã thay đổi: Nhận dữ liệu từ ViewModel thông qua Screen truyền xuống
+    name: String,
+    email: String,
+    password: String,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onRegisterClick: () -> Unit,
+    isLoading: Boolean
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    // isChecked vẫn có thể để ở UI vì nó không cần lưu lên server
     var isChecked by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -32,7 +38,7 @@ fun RegisterForm(
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = onNameChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -49,7 +55,7 @@ fun RegisterForm(
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = onEmailChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -66,7 +72,7 @@ fun RegisterForm(
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = onPasswordChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -125,17 +131,25 @@ fun RegisterForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Nút Đăng ký
-        OutlinedButton(
-            onClick = { onRegisterClick(name, email, password) },
+        // Nút Đăng ký (Đã thêm Loading Indicator)
+        Button(
+            onClick = onRegisterClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue),
-            enabled = isChecked
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E2C)),
+            enabled = isChecked && !isLoading
         ) {
-            Text("Đăng ký", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Đăng ký", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
         }
     }
 }

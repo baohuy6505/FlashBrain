@@ -8,4 +8,5 @@ interface DeckRepository {
     fun getDeckById(id: String): Flow<Deck?>
     suspend fun saveDeck(deck: Deck)
     suspend fun deleteDeck(id: String)
+    suspend fun fetchDecksFromServer()
 }
