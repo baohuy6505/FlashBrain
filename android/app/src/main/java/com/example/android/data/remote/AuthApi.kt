@@ -24,14 +24,11 @@ interface AuthApi {
         @Body request: GoogleLoginRequest
     ): Response<ApiResponse<AuthResponseData>>
 
-//    // Lấy thông tin cá nhân
-//    @GET("api/auth/me")
-//    suspend fun getMe(
-//        @Header("Authorization") token: String
-//    ): Response<ApiResponse<UserRemoteModel>>
+    @GET("api/auth/me")
+    suspend fun getMe(
+        @Header("Authorization") token: String
+    ): Response<ApiResponse<UserRemoteDTO>>
 
-    // --- THÊM HÀM LOGOUT Ở ĐÂY ---
-    // Gửi yêu cầu đăng xuất lên Server (nếu Server cần xóa session/token)
     @POST("api/auth/logout")
     suspend fun logout(
         @Header("Authorization") token: String
