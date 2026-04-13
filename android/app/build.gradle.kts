@@ -17,26 +17,41 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 1. Đưa signingConfigs lên trước
+    signingConfigs {
+        create("release") {
+            // Đảm bảo file này nằm trong thư mục app/
+            storeFile = file("flashbrain-key.jks")
+            storePassword = "120305"
+            keyAlias = "flashbrain_key"
+            keyPassword = "120305"
+        }
+    }
+
+    // 2. Chỉ dùng MỘT khối buildTypes duy nhất
     buildTypes {
-        release {
+        getByName("debug") {
+            // Ép bản debug dùng chung chữ ký với bản release để đồng bộ SHA-1
+            signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
+
     compileOptions {
-        // SỬA: Nâng lên Java 17 để tương thích tốt với các thư viện mới
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        // SỬA: Nâng lên Java 17
         jvmTarget = "17"
     }
     buildFeatures {
