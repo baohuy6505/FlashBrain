@@ -17,6 +17,9 @@ class IAuthService {
     async deleteMyAccount(userId, password) {
         throw new Error("Method not implemented");
     }
+    async googleLogin(idToken) {
+        throw new Error("Method not implemented");
+    }
 }           
 
 module.exports = IAuthService;

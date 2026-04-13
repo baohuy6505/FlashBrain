@@ -15,8 +15,21 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
+<<<<<<< HEAD
     "title": "Từ vựng IELTS 7.0+",
     "isPublic": true
+=======
+  "email": "haha@gmail.com",
+  "password": "12345678"
+}
+
+### Đăng nhập bằng Google
+POST http://localhost:3000/api/auth/google-login
+Content-Type: application/json
+
+{
+    "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImNjZTRlMDI0YTUxYWEwYzFjNDFjMWE0NTE1YTQxZGQ3ZTk2MTkzNmIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDgzNzgzMDk0NjUyMjQwMDM0MjkiLCJlbWFpbCI6InZ1Njc4OTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJUdzBGNEViRVBVMWVIYzJSbUVqQ2ZRIiwibmFtZSI6IlZ1IFRydW9uZyIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NKZjYwOFNFV2RNdW1BcnpSVk54djVqSmtMWjBPYkhEYm8yOE5HaEFqelRRYzl0MVE9czk2LWMiLCJnaXZlbl9uYW1lIjoiVnUiLCJmYW1pbHlfbmFtZSI6IlRydW9uZyIsImlhdCI6MTc3NTkyODQwOSwiZXhwIjoxNzc1OTMyMDA5fQ.cBgk1xp4dGPA04BnrIcvvDLLpZQUzwBKqZ2kBxnioVNQcgo6SP1eAgXp1NkFhAdXwHcGAKypkVqhtC8BtukVwEVH0omwOLzS8tSuicrsgzMY3Fhecs3ddr_2STzNjHkcsXuhJ2qeMlIc3Ra-EsRxgLBXHOX6xG_jg5705Vfje0C-hvyQKJiTW-m1I5xeiFu4ZqPf9ldzHfYU0cSRXBz1vfFiIgaOBw3Y13zep9lMMcHAn39UxEj4-vKf_SLOx4jkdWM40dWBR5xRjpf9pCVNg54oND3Bu3juJOqcV7HRtPjp0Fskh1rwy9mp2sYYfKyoHJgrHmwJRSJeG0t5-FQ_xw"
+>>>>>>> feature/auth-user-api-vu
 }
 
 ### 3. Lỗi: Tạo bộ bài nhưng quên nhập tên (Test validation)
@@ -25,8 +38,13 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
+<<<<<<< HEAD
     "title": "",
     "isPublic": false
+=======
+  "oldPassword": "matkhau_moi_123", 
+  "newPassword": "12345678"
+>>>>>>> feature/auth-user-api-vu
 }
 
 ### 4. Lấy thông tin chi tiết một bộ bài
@@ -61,6 +79,7 @@ Content-Type: application/json
     "isPublic": false
 }
 
+<<<<<<< HEAD
 ### 8. Xóa mềm một bộ bài (Cho vào thùng rác)
 # Thay <ID_CUA_BO_BAI> bằng ID bộ bài bạn muốn xóa
 DELETE {{baseUrl}}/decks/67b33391-f120-4483-aeb6-5a98d7d9cac4
@@ -99,3 +118,12 @@ Content-Type: application/json
 DELETE {{baseUrl}}/decks/6f6c5d1b-3c47-4555-9e26-e8ecd4f2aaf5/hard
 Authorization: Bearer {{token}}
 Content-Type: application/json
+=======
+Huy Xai Postman
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="tải xuống.jpg"
+Content-Type: image/png
+
+< ./tải xuống.jpg
+--WebAppBoundary--
+>>>>>>> feature/auth-user-api-vu

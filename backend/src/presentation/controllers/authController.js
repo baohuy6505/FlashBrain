@@ -5,6 +5,23 @@ const UpdateProfileRequestDto = require('../../application/dtos/authDto/updatePr
 const ChangePasswordRequestDto = require('../../application/dtos/authDto/changePasswordRequestDto');
 const DeleteAccountRequestDto = require('../../application/dtos/authDto/deleteAccountRequestDto');
 class AuthController {      
+    async loginWithGoogle(req, res) {
+        try {
+            // Android sẽ gửi idToken lên thông qua Body JSON
+            const { idToken } = req.body; 
+            
+            const result = await authService.googleLogin(idToken);
+            
+            return res.status(200).json({
+                success: true,
+                message: "Đăng nhập Google thành công",
+                data: result // Trả về cục Token JWT
+            });
+        } catch (error) {
+            return res.status(401).json({ success: false, message: error.message });
+        }
+    }
+    
     async register(req, res) { 
         try {
             const registerDto = new RegisterRequestDto(req.body);
@@ -72,7 +89,6 @@ class AuthController {
         try {
             const userId = req.user.userId; 
             
-            // 1. Lấy tên từ Body
             const requestData = { name: req.body.name };
 
             // 2. Nếu người dùng CÓ up file, multer sẽ để cái link Cloudinary ở req.file.path

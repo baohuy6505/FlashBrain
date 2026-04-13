@@ -17,7 +17,7 @@ class ChangePasswordRequestDto {
             throw new Error("Mật khẩu mới phải khác mật khẩu cũ");
         } 
 
-        return true; // Nếu tất cả validate đều pass
+        return true;
     }
 }
 

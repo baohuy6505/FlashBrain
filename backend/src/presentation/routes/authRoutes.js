@@ -6,9 +6,14 @@ const upload = require('../middlewares/uploadMiddleware');
 const { registerLimiter } = require('../middlewares/rateLimiter');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+//Dăng nhập bằng Google
+// POST /api/auth/google-login
+router.post('/google-login', authController.loginWithGoogle.bind(authController));
+
 // 1. Đăng ký tài khoản mới
 // POST /api/auth/register
 router.post('/register', registerLimiter, authController.register);
+
 // 2. Đăng nhập
 // POST /api/auth/login
 router.post('/login', authController.login);
