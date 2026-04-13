@@ -3,6 +3,7 @@ package com.example.android.di
 import android.content.Context
 import androidx.room.Room
 import com.example.android.data.local.AppDatabase
+import com.example.android.data.local.SessionManager // Thêm import này
 import com.example.android.data.local.dao.DeckDao
 import com.example.android.data.local.dao.FlashcardDao
 import dagger.Module
@@ -38,5 +39,14 @@ object DatabaseModule {
     @Provides
     fun provideFlashcardDao(database: AppDatabase): FlashcardDao {
         return database.flashcardDao()
+    }
+
+    // --- Bổ sung SessionManager để hết lỗi đỏ ở UserRepositoryImpl ---
+    @Provides
+    @Singleton
+    fun provideSessionManager(
+        @ApplicationContext context: Context
+    ): SessionManager {
+        return SessionManager(context)
     }
 }

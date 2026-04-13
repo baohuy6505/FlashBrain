@@ -2,7 +2,6 @@ package com.example.android.di
 
 import com.example.android.data.remote.AuthApi
 import com.example.android.data.remote.FlashcardApi
-import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -12,6 +11,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -21,22 +21,26 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(): Retrofit {
-        // 1. Tạo cái máy ghi âm log
+        // 1. Máy ghi log để soi lỗi trong Logcat
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        // 2. Gắn nó vào OkHttpClient
+        // 2. OkHttpClient với thời gian chờ lâu hơn (tránh lỗi Timeout)
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build()
 
+        // 3. GSON đơn giản, không tự ý đổi tên biến
         val gson = GsonBuilder()
-            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .setLenient() // Chấp nhận JSON không chuẩn
             .create()
 
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.47:3000/")
+            .baseUrl("http://10.0.2.2:3000/") // Đúng chuẩn cho Emulator
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
