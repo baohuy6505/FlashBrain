@@ -21,6 +21,7 @@ import androidx.work.WorkManager
 import com.example.android.data.worker.NotificationWorker
 import com.example.android.domain.repository.NotificationRepository
 import com.example.android.presentation.layouts.MainLayout
+import com.example.android.presentation.manager.StudyReminderManager
 import com.example.android.presentation.screens.profile.ProfileScreen
 import com.example.android.presentation.screens.profile.ProfileViewModel
 import com.example.android.presentation.screens.study.StudyScreen
@@ -47,10 +48,13 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        //kich hoat nhac hoc hang ngay
-        lifecycleScope.launch {
-            notificationRepository.scheduleDailyReminder()
-        }
+        //treo thong bao chay ngam
+        StudyReminderManager.startDailyReminders(this)
+
+        //su dung de Demo chuc nang thong bao + NotificationWorker
+//        val testRequest = androidx.work.OneTimeWorkRequestBuilder<NotificationWorker>().build()
+//        androidx.work.WorkManager.getInstance(this).enqueue(testRequest)
+
 
         enableEdgeToEdge()
 

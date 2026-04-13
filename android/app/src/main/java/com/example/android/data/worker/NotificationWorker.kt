@@ -56,6 +56,26 @@ class NotificationWorker @AssistedInject constructor(
         return Result.success()
     }
 
+//su dung de demo thong bao
+//override suspend fun doWork(): Result {
+//    // Tạm thời ép dữ liệu ảo để test
+//    val testNote = NotificationEntity(
+//        id = UUID.randomUUID().toString(),
+//        userId = "huy_test",
+//        title = "Ting Ting! Code chạy rồi nè 🚀",
+//        message = "Thông báo Local đã hoạt động nhé Huy. Giờ đi ngủ thôi!",
+//        scheduledAt = "Now",
+//        isSent = false,
+//        createdAt = System.currentTimeMillis().toString()
+//    )
+//
+//    // Bỏ qua IF, gọi thẳng hàm bắn thông báo
+//    sendVisualNotification(testNote)
+//
+//    return Result.success()
+//}
+
+
     private fun sendVisualNotification(note: NotificationEntity) {
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "flashbrain_reminder"

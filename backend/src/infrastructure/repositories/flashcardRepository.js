@@ -49,7 +49,7 @@ class FlashcardRepository extends IFlashcardRepository {
     }
 
     // Lấy thống kê thẻ bài dựa trên danh sách Deck ID
-    async getStatsByDeckIds(deckIds) {
+    async  getStatsByDeckIds(deckIds) {
         const now = new Date();
 
         // 1. Tổng số thẻ (Chưa bị xóa)

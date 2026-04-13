@@ -10,7 +10,8 @@ data class NotificationEntity(
     val title: String,
     val message: String,
     val scheduledAt: String,
+    val isActive: Boolean = true,
     val isSent: Boolean = false,
-    val isRead: Boolean = false,        // ← Thêm trạng thái đọc
+    val isRead: Boolean = false,
     val createdAt: String = ""
 )

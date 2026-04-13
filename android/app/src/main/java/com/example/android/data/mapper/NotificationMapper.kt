@@ -7,14 +7,15 @@ import com.example.android.domain.model.Notification
 // DTO (server) → Entity (local DB)
 fun NotificationDto.toEntity(): NotificationEntity {
     return NotificationEntity(
-        id = this._id,
-        userId = this.user_id,
+        id = this.id,
+        userId = this.userId,
         title = this.title,
         message = this.message,
-        scheduledAt = this.scheduled_at,
+        scheduledAt = this.dailyTime,
+        isActive = this.isActive,
         isSent = true,
-        isRead = false,                 // Mặc định chưa đọc khi mới sync về
-        createdAt = this.created_at
+        isRead = false,
+        createdAt = this.createdAt
     )
 }
 

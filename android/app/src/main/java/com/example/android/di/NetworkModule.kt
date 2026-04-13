@@ -59,6 +59,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
-        return retrofit.create(NotificationApi::class.java) // 👈 Hilt sẽ tạo Api từ Retrofit
+        return retrofit.create(NotificationApi::class.java)
     }
 }

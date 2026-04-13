@@ -27,3 +27,19 @@ Authorization: Bearer {{token}}
 POST http://localhost:3000/api/progress/study
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+### 1. Đặt lịch thông báo
+# Giả sử bây giờ là 14:00, bạn thử nhập "10:00" xem nó có tự nhảy sang ngày mai không nhé!
+POST http://localhost:3000/api/notifications/setting
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "time": "10:01",
+    "title": "Nhắc nhở học tập",
+    "message": "FlashBrain đang đợi bạn vào ôn bài đó!"
+}
+
+### 2. Xem các thông báo đang chờ
+GET http://localhost:3000/api/notifications/setting
+Authorization: Bearer {{token}}

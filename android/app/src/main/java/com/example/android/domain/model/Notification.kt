@@ -6,6 +6,7 @@ data class Notification(
     val title: String,
     val message: String,
     val scheduledAt: String,
+    val isActive: Boolean = true,
     val isSent: Boolean = false,
     val isRead: Boolean = false,        // ← Thêm field này
     val createdAt: String = ""

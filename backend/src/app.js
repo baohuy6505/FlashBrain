@@ -6,7 +6,10 @@ const connectDB = require('./infrastructure/database/dbConnect');
 const cloudinary = require('./infrastructure/database/cloudinary')
 const app = express();
 const routes = require('./presentation/routes');
+const notificationJob = require('./infrastructure/jobs/notificationJob');
 
+
+// ... app.listen(3000, () => { console.log('Server chạy...') })
 app.use(cors());
 app.use(express.json());
 
@@ -19,6 +22,7 @@ app.use(express.json());
 connectDB();
 cloudinary();
 
+notificationJob.start();
 // test route
 app.get("/test-router", (req, res) => {
     res.send("FlashBrain API running...");
