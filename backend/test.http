@@ -1,7 +1,7 @@
 ### Cấu hình biến môi trường cục bộ
 @baseUrl = http://localhost:3000/api
 # Đăng nhập vào app và copy Token dán vào đây:
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTgxNTIzNywiZXhwIjoxNzc2NDIwMDM3fQ.tQsNXwDIZDD60ephWHC6A9R7XBm6OOCBBNVhWmenKGE
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NjA0ODcxNiwiZXhwIjoxNzc2NjUzNTE2fQ._0OOs545gphZNH8bY54CwR0jVaKoeykDLabzDhxdqcw
 
 
 ### 1. Lấy danh sách bộ bài của User hiện tại
@@ -31,7 +31,7 @@ Content-Type: application/json
 
 ### 4. Lấy thông tin chi tiết một bộ bài
 # Bạn hãy copy cái "id" của bộ bài "Từ vựng IELTS" mà bạn vừa tạo ở bước 2 thay vào chữ <ID_CUA_BO_BAI> bên dưới nhé
-GET {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+GET {{baseUrl}}/decks/0c838254-d630-42f5-b49f-35ee71537fd4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -42,7 +42,7 @@ Content-Type: application/json
 
 ### 6. Cập nhật thông tin bộ bài (Đổi tên và Public)
 # Thay <ID_CUA_BO_BAI> bằng ID thật của bộ bài bạn muốn sửa
-PUT {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+PUT {{baseUrl}}/decks/0c838254-d630-42f5-b49f-35ee71537fd4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -52,7 +52,7 @@ Content-Type: application/json
 }
 
 ### 7. Lỗi: Cập nhật bộ bài mà không truyền tên (Test validation)
-PUT {{baseUrl}}/decks/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+PUT {{baseUrl}}/decks/0c838254-d630-42f5-b49f-35ee71537fd4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -99,55 +99,3 @@ Content-Type: application/json
 DELETE {{baseUrl}}/decks/6f6c5d1b-3c47-4555-9e26-e8ecd4f2aaf5/hard
 Authorization: Bearer {{token}}
 Content-Type: application/json
-
-POST http://localhost:3000/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "haha@gmail.com",
-  "password": "matkhau_moi_123"
-}
-
-### Lấy thông tin cá nhân (Get Me)
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTgxNTIzNywiZXhwIjoxNzc2NDIwMDM3fQ.tQsNXwDIZDD60ephWHC6A9R7XBm6OOCBBNVhWmenKGE
-GET http://localhost:3000/api/auth/me
-Authorization: Bearer {{token}}
-
-###
-POST http://localhost:3000/api/auth/logout
-Authorization: Bearer {{token}}
-
-###
-PUT http://localhost:3000/api/auth/me/password
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "oldPassword": "12345678", 
-  "newPassword": "matkhau_moi_123"
-}
-
-###
-DELETE http://localhost:3000/api/auth/me
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "password": "matkhau_moi_123"
-}
-
-### Cập nhật profile có kèm ảnh
-PUT http://localhost:3000/api/auth/me
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=WebAppBoundary
-
---WebAppBoundary
-Content-Disposition: form-data; name="name"
-
-Huy Xai Postman
---WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="Ảnh chụp màn hình 2025-12-10 221637.png"
-Content-Type: image/png
-
-< ./Ảnh chụp màn hình 2025-12-10 221637.png
---WebAppBoundary--

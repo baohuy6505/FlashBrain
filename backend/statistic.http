@@ -1,0 +1,29 @@
+### Cấu hình biến môi trường
+@baseUrl = http://localhost:3000/api
+# Lát nữa lấy được token thì dán đè vào chữ DAN_TOKEN_CUA_BAN_VAO_DAY nhé:
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NjA0ODcxNiwiZXhwIjoxNzc2NjUzNTE2fQ._0OOs545gphZNH8bY54CwR0jVaKoeykDLabzDhxdqcw
+
+### 1. Đăng nhập để lấy Token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "haha@gmail.com",
+  "password": "12345678"
+}
+
+
+### Lấy thống kê màn hình chính (Dashboard)
+GET http://localhost:3000/api/statistics/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 1. Xem tiến độ (Lần đầu tiên chưa học gì)
+GET http://localhost:3000/api/progress/me
+Authorization: Bearer {{token}}
+
+
+### 2. Điểm danh (Giả lập việc user vừa bấm học xong 1 thẻ)
+POST http://localhost:3000/api/progress/study
+Authorization: Bearer {{token}}
+Content-Type: application/json

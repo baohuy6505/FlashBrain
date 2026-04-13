@@ -1,6 +1,6 @@
 ### BƯỚC 0: Nhập Token của bạn vào đây
 @baseUrl = http://localhost:3000/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NTgxNTIzNywiZXhwIjoxNzc2NDIwMDM3fQ.tQsNXwDIZDD60ephWHC6A9R7XBm6OOCBBNVhWmenKGE
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjZjNWQxYi0zYzQ3LTQ1NTUtOWUyNi1lOGVjZDRmMmFhZjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3NjA0ODcxNiwiZXhwIjoxNzc2NjUzNTE2fQ._0OOs545gphZNH8bY54CwR0jVaKoeykDLabzDhxdqcw
 
 
 
@@ -16,20 +16,20 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "deckId": "910bd1eb-5d95-4420-94ff-a5ac7b26ff95",
+    "deckId": "98347c0e-fbe2-47f0-b695-c28b4c438c90",
     "frontText": "Huy",
     "backText": "Huy hahaah"
 }
 
 
 ### BƯỚC 3: Lấy toàn bộ thẻ Flashcard trong 1 Deck
-GET {{baseUrl}}/flashcards/deck/910bd1eb-5d95-4420-94ff-a5ac7b26ff95
+GET {{baseUrl}}/flashcards/deck/98347c0e-fbe2-47f0-b695-c28b4c438c90
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### BƯỚC 4: Sửa nội dung của một thẻ
 # Bạn copy ID của THẺ FLASHCARD (không phải ID bộ bài) dán vào đây:
-PUT {{baseUrl}}/flashcards/b32dfa90-6a1a-4f9b-8859-acc6575e35ab
+PUT {{baseUrl}}/flashcards/e88ae0a8-34e2-45d7-a4fb-c3ccd4c567ea
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
