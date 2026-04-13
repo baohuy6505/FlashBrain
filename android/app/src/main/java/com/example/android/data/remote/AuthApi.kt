@@ -19,6 +19,11 @@ interface AuthApi {
         @Body request: LoginRequest
     ): Response<ApiResponse<AuthResponseData>>
 
+    @POST("api/auth/google-login")
+    suspend fun loginWithGoogle(
+        @Body request: GoogleLoginRequest
+    ): Response<ApiResponse<AuthResponseData>>
+
 //    // Lấy thông tin cá nhân
 //    @GET("api/auth/me")
 //    suspend fun getMe(

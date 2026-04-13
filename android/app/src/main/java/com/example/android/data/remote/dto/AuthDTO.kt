@@ -13,7 +13,12 @@ data class LoginRequest(
     @SerializedName("password") val password: String
 )
 
-
+/**
+ * Request dùng để gửi Token nhận được từ Google Sign-In SDK lên Backend
+ */
+data class GoogleLoginRequest(
+    @SerializedName("idToken") val idToken: String
+)
 
 data class AuthResponseData(
     @SerializedName("token") val token: String

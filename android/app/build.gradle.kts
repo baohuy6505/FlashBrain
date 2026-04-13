@@ -91,4 +91,14 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // 1. Thư viện Credential Manager chính
+    implementation("androidx.credentials:credentials:1.2.2")
+
+    // 2. Hỗ trợ các dịch vụ của Google Play (để hiện bảng chọn tài khoản)
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+
+    // 3. Thư viện lấy ID Token của Google
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
 }

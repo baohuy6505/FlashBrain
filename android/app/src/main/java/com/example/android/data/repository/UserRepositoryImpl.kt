@@ -16,10 +16,11 @@ import java.io.File
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
-    private val authApi: AuthApi, // Biến này tên là authApi
+    private val authApi: AuthApi,
     private val sessionManager: SessionManager
 ) : UserRepository {
-    //register
+
+    // ── REGISTER ──
     override suspend fun register(request: RegisterRequest): Result<AuthResponseData> =
         withContext(Dispatchers.IO) {
             try {
@@ -37,7 +38,8 @@ class UserRepositoryImpl @Inject constructor(
                 Result.failure(e)
             }
         }
-    //login
+
+    // ── LOGIN (EMAIL/PASSWORD) ──
     override suspend fun login(request: LoginRequest): Result<AuthResponseData> =
         withContext(Dispatchers.IO) {
             try {
@@ -55,7 +57,28 @@ class UserRepositoryImpl @Inject constructor(
             }
         }
 
-    // update
+    // ── LOGIN WITH GOOGLE (MỚI) ──
+    override suspend fun loginWithGoogle(idToken: String): Result<AuthResponseData> =
+        withContext(Dispatchers.IO) {
+            try {
+                // Đóng gói idToken vào DTO
+                val request = GoogleLoginRequest(idToken = idToken)
+                val response = authApi.loginWithGoogle(request)
+                val body = response.body()
+
+                if (response.isSuccessful && body?.success == true) {
+                    // Lưu Token hệ thống của BE trả về sau khi verify Google thành công
+                    body.data?.token?.let { sessionManager.saveToken(it) }
+                    Result.success(body.data!!)
+                } else {
+                    Result.failure(Exception(body?.message ?: "Đăng nhập Google thất bại"))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+    // ── UPDATE PROFILE ──
     override suspend fun updateProfile(name: String, imagePath: String?): Result<User> =
         withContext(Dispatchers.IO) {
             try {
@@ -90,21 +113,19 @@ class UserRepositoryImpl @Inject constructor(
             }
         }
 
-    // Logout
+    // ── LOGOUT ──
     override suspend fun logout(): Result<String> = withContext(Dispatchers.IO) {
         try {
-            // Lấy token từ SessionManager
             val tokenFromSession = sessionManager.authToken ?: ""
             val myToken = if (tokenFromSession.startsWith("Bearer ")) tokenFromSession else "Bearer $tokenFromSession"
 
-            // Gọi hàm logout từ authApi (đã đổi từ apiService sang authApi)
             val response = authApi.logout(myToken)
 
             if (response.isSuccessful) {
                 val body = response.body()
                 val message = body?.message ?: "Đăng xuất thành công"
 
-                // Xóa dữ liệu cục bộ
+                // Xóa token và user cục bộ
                 sessionManager.logout()
 
                 Result.success(message)

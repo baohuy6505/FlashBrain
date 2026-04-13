@@ -9,12 +9,15 @@ interface UserRepository {
     // Đăng ký
     suspend fun register(request: RegisterRequest): Result<AuthResponseData>
 
-    // Đăng nhập
+    // Đăng nhập email/mật khẩu
     suspend fun login(request: LoginRequest): Result<AuthResponseData>
 
-    // --- THÊM HÀM ĐĂNG XUẤT TẠI ĐÂY ---
+    // Đăng nhập bằng Google
+    suspend fun loginWithGoogle(idToken: String): Result<AuthResponseData>
+
+    // Đăng xuất
     suspend fun logout(): Result<String>
 
-    // Cập nhật profile (Phần của thành viên khác)
+    // Cập nhật profile
     suspend fun updateProfile(name: String, imagePath: String?): Result<User>
 }
