@@ -12,11 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 // Quan trọng: Đảm bảo import đúng đường dẫn đến Model
 import com.example.android.domain.model.Flashcard
 import com.example.android.presentation.screens.flashcard.FlashcardViewModel
@@ -40,6 +44,20 @@ fun FlashcardListScreen(
     var showSheet by remember { mutableStateOf(false) }
     var cardToEdit by remember { mutableStateOf<Flashcard?>(null) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Gọi hàm loadCards Huy đã viết trong ViewModel
+                // Hàm này sẽ fetch dữ liệu mới nhất của Deck này từ Server
+                viewModel.loadCards(deckId)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(

@@ -24,8 +24,7 @@ import com.example.android.presentation.screens.desk.DeckSearchBar
 import com.example.android.presentation.screens.desk.DeckViewModel
 import androidx.compose.runtime.DisposableEffect
 
-import androidx.compose.ui.platform.LocalLifecycleOwner
-
+import androidx.lifecycle.compose.LocalLifecycleOwner // 👈 Thêm dòng này
 import androidx.lifecycle.Lifecycle
 
 import androidx.lifecycle.LifecycleEventObserver

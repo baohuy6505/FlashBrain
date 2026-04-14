@@ -34,7 +34,13 @@ import androidx.compose.runtime.getValue
 import com.example.android.presentation.screens.home.components.ProBanner
 import com.example.android.presentation.screens.home.components.StreakCard
 import java.util.concurrent.ConcurrentNavigableMap
+import androidx.compose.runtime.DisposableEffect
 
+import androidx.lifecycle.Lifecycle
+
+import androidx.lifecycle.LifecycleEventObserver
+
+import androidx.compose.ui.platform.LocalLifecycleOwner
 // Tạo một biến chứa dữ liệu mẫu để "đổ" vào HomeScreen
 
 @Composable
@@ -43,6 +49,19 @@ fun HomeScreen(
     onNavigateToDecks: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            // Khi app được mở lại hoặc quay lại màn hình Home
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.fetchData()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         // GẮN THANH MENU DƯỚI ĐÂY
         bottomBar = {
