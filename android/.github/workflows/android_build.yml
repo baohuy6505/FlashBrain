@@ -2,13 +2,16 @@ name: FlashBrain Android CI
 
 on:
   push:
-    branches: [ "main" ] # Chạy khi bạn merge code vào nhánh main
+    branches: [ "master" ] # Chạy khi bạn merge code vào nhánh main
   pull_request:
-    branches: [ "main" ] # Chạy cả khi bạn tạo PR để kiểm tra xem code có lỗi build không
+    branches: [ "master" ] # Chạy cả khi bạn tạo PR để kiểm tra xem code có lỗi build không
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./android
 
     steps:
       - name: Checkout code
@@ -32,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: FlashBrain-Debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
       # Cách 2: Tự động tạo Release nếu bạn push một cái Tag (Ví dụ: git tag v1.0 && git push origin v1.0)
       - name: Create Release
