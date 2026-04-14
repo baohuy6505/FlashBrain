@@ -22,13 +22,32 @@ import com.example.android.presentation.screens.desk.DeckHeader
 import com.example.android.presentation.screens.desk.DeckListItem
 import com.example.android.presentation.screens.desk.DeckSearchBar
 import com.example.android.presentation.screens.desk.DeckViewModel
+import androidx.compose.runtime.DisposableEffect
 
+import androidx.compose.ui.platform.LocalLifecycleOwner
+
+import androidx.lifecycle.Lifecycle
+
+import androidx.lifecycle.LifecycleEventObserver
 @Composable
 fun DecksScreen(
     viewModel: DeckViewModel = hiltViewModel(),
     onDeckClick: (String) -> Unit
 ) {
     val deckList by viewModel.decksState.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshDecks()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // 👈 Lấy userId từ ViewModel để truyền xuống BottomSheet
     val currentUserId = viewModel.currentUserId
