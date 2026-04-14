@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,7 +27,6 @@ import com.example.android.R
 import com.example.android.domain.model.User
 import com.example.android.presentation.ui.theme.*
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun MainLayout(
@@ -57,31 +57,43 @@ fun MainLayout(
                 drawerContainerColor = Color.White,
                 modifier = Modifier.width(300.dp)
             ) {
-                // Header Drawer: Thông tin người dùng
+                // --- HEADER DRAWER ---
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(BgGray)
                         .padding(24.dp)
                 ) {
-                    AsyncImage(
-                        model = user?.image ?: R.drawable.avt,
-                        contentDescription = "Avatar",
+                    // Hiển thị Avatar (Nền xám nếu user chưa có ảnh hoặc user bị null)
+                    Box(
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .border(2.dp, ProGold, CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                            .background(Color.LightGray)
+                            .border(2.dp, if (user?.subscriptionType == "PREMIUM") ProGold else Color.Transparent, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (user?.image.isNullOrEmpty()) {
+                            Icon(Icons.Default.Person, null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                        } else {
+                            AsyncImage(
+                                model = user?.image,
+                                contentDescription = "Avatar",
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = user?.name ?: "Người dùng",
+                        text = user?.name ?: "Guest",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
                     Text(
-                        text = user?.email ?: "example@mail.com",
+                        text = user?.email ?: "Not logged in",
                         fontSize = 14.sp,
                         color = TextGray
                     )
@@ -89,7 +101,7 @@ fun MainLayout(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Các mục điều hướng chính
+                // Các mục điều hướng
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Dashboard, null) },
                     label = { Text("Home") },
@@ -119,36 +131,21 @@ fun MainLayout(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                    color = BgGray
-                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp), color = BgGray)
 
-                // Các mục hỗ trợ
+                // Hỗ trợ & Logout
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.Notifications, null) },
                     label = { Text("Notifications") },
                     selected = false,
                     onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            onNavigateToNotification()
-                        }
+                        scope.launch { drawerState.close(); onNavigateToNotification() }
                     },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                )
-
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, null) },
-                    label = { Text("Help & Support") },
-                    selected = false,
-                    onClick = { },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Nút Đăng xuất (Logout)
                 NavigationDrawerItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.Logout, null, tint = Color.Red) },
                     label = { Text("Logout", color = Color.Red) },
@@ -186,9 +183,6 @@ fun MainLayout(
     }
 }
 
-/**
- * Thanh công cụ phía trên (TopBar)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonTopBar(
@@ -199,14 +193,7 @@ fun CommonTopBar(
     onMenuClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextGray,
-            )
-        },
+        title = { Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextGray) },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextBlack)
@@ -215,24 +202,28 @@ fun CommonTopBar(
         actions = {
             if (isSettingsTab) {
                 IconButton(onClick = onNotificationClick) {
-                    Icon(Icons.Outlined.Notifications, contentDescription = "Notifications", tint = TextBlack)
+                    Icon(Icons.Outlined.Notifications, null, tint = TextBlack)
                 }
             } else {
+                // Ảnh nhỏ góc TopBar
                 Box(
                     modifier = Modifier
                         .padding(end = 16.dp)
                         .size(42.dp)
-                        .border(width = 1.5.dp, color = ProGold, shape = CircleShape),
+                        .border(width = 1.5.dp, color = if (user?.subscriptionType == "PREMIUM") ProGold else Color.Transparent, CircleShape)
+                        .background(if (user?.image.isNullOrEmpty()) Color.LightGray else Color.Transparent, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = user?.image ?: R.drawable.avt,
-                        contentDescription = "Small Avatar",
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (user?.image.isNullOrEmpty()) {
+                        Icon(Icons.Default.Person, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                    } else {
+                        AsyncImage(
+                            model = user?.image,
+                            contentDescription = "Small Avatar",
+                            modifier = Modifier.size(36.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
             }
         },
@@ -240,9 +231,6 @@ fun CommonTopBar(
     )
 }
 
-/**
- * Thanh điều hướng phía dưới (BottomBar)
- */
 @Composable
 fun CommonBottomNavigation(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     val items = listOf(

@@ -22,15 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.android.R
 import com.example.android.presentation.ui.theme.*
 import java.io.File
 import java.io.FileOutputStream
@@ -41,18 +38,16 @@ fun HeaderUserSection(
     email: String,
     balance: Double,
     isPro: Boolean,
-    avatarUri: String?, // Kiểu String để khớp với User Model (URL từ Server)
-    onUpdateClick: (String, String?) -> Unit // Trả về Name và Path của ảnh để ViewModel xử lý
+    avatarUri: String?,
+    onUpdateClick: (String, String?) -> Unit
 ) {
     val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
     var showAvatarPreview by remember { mutableStateOf(false) }
 
-    // --- TRẠNG THÁI TẠM TRONG DIALOG ---
     var editedName by remember { mutableStateOf(name) }
     var tempAvatarUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Đồng bộ lại khi mở Dialog
     LaunchedEffect(showEditDialog) {
         if (showEditDialog) {
             editedName = name
@@ -75,25 +70,37 @@ fun HeaderUserSection(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // --- BOX AVATAR ---
+            // --- AVATAR CHÍNH ---
             Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.size(110.dp)) {
                 Box(
                     modifier = Modifier
-                        .size(108.dp).clip(CircleShape)
-                        .clickable { showAvatarPreview = true }
+                        .size(108.dp)
+                        .clip(CircleShape)
+                        // Chỉ cho phép bấm xem ảnh nếu đã có ảnh từ server
+                        .clickable { if (!avatarUri.isNullOrEmpty()) showAvatarPreview = true }
+                        .background(BgGray)
                         .border(3.dp, if (isPro) ProGold else Color.Transparent, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(avatarUri ?: R.drawable.avt)
-                            .crossfade(true).build(),
-                        contentDescription = "User Avatar",
-                        modifier = Modifier.size(100.dp).clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(id = R.drawable.avt),
-                        error = painterResource(id = R.drawable.avt)
-                    )
+                    if (avatarUri.isNullOrEmpty()) {
+                        // Hiện nền xám + Icon nếu không có ảnh
+                        Icon(
+                            imageVector = Icons.Default.PhotoCamera,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    } else {
+                        // Chỉ load AsyncImage nếu có URL
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(avatarUri)
+                                .crossfade(true).build(),
+                            contentDescription = "User Avatar",
+                            modifier = Modifier.size(100.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
 
                 if (isPro) {
@@ -114,7 +121,7 @@ fun HeaderUserSection(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().padding(start = 24.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = name, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = TextBlack)
                 IconButton(onClick = { showEditDialog = true }) {
@@ -131,15 +138,15 @@ fun HeaderUserSection(
         }
     }
 
-    // --- 1. DIALOG XEM ẢNH ---
-    if (showAvatarPreview) {
+    // --- 1. DIALOG XEM ẢNH PHÓNG TO ---
+    if (showAvatarPreview && !avatarUri.isNullOrEmpty()) {
         Dialog(onDismissRequest = { showAvatarPreview = false }) {
             Box(
-                modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.9f)).clickable { showAvatarPreview = false },
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.85f)).clickable { showAvatarPreview = false },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = avatarUri ?: R.drawable.avt,
+                    model = avatarUri,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth(0.9f).aspectRatio(1f).clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
@@ -148,59 +155,90 @@ fun HeaderUserSection(
         }
     }
 
-    // --- 2. DIALOG SỬA ---
+    // --- 2. DIALOG CHỈNH SỬA ---
     if (showEditDialog) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
             title = { Text("Chỉnh sửa thông tin", fontWeight = FontWeight.Bold) },
             text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AsyncImage(
-                        model = tempAvatarUri ?: avatarUri ?: R.drawable.avt,
-                        contentDescription = null,
-                        modifier = Modifier.size(80.dp).clip(CircleShape).border(1.dp, BgGray, CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(BgGray)
+                            .border(1.dp, Color.LightGray, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val imageSource = tempAvatarUri ?: if (!avatarUri.isNullOrEmpty()) avatarUri else null
+
+                        if (imageSource != null) {
+                            AsyncImage(
+                                model = imageSource,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.PhotoCamera,
+                                contentDescription = null,
+                                tint = Color.Gray,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     OutlinedButton(
                         onClick = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                        shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Default.PhotoCamera, null)
                         Spacer(Modifier.width(8.dp))
                         Text("Thay đổi ảnh đại diện")
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
                     OutlinedTextField(
                         value = editedName,
                         onValueChange = { editedName = it },
                         label = { Text("Tên hiển thị") },
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    val filePath = tempAvatarUri?.let { uri ->
-                        createFileFromUri(context, uri)?.absolutePath
-                    }
-                    onUpdateClick(editedName, filePath) // Truyền về Screen để gọi ViewModel
-                    showEditDialog = false
-                }, colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)) {
+                Button(
+                    onClick = {
+                        val filePath = tempAvatarUri?.let { uri ->
+                            createFileFromUri(context, uri)?.absolutePath
+                        }
+                        onUpdateClick(editedName, filePath)
+                        showEditDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                ) {
                     Text("Lưu thay đổi")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Hủy", color = TextGray) }
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("Hủy", color = TextGray)
+                }
             }
         )
     }
 }
 
-/**
- * Hàm Helper quan trọng: Copy Uri vào bộ nhớ Cache để có Path thực tế gửi API
- */
 private fun createFileFromUri(context: Context, uri: Uri): File? {
     return try {
         val inputStream = context.contentResolver.openInputStream(uri)

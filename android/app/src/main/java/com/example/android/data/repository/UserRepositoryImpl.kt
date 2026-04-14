@@ -20,16 +20,13 @@ class UserRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager
 ) : UserRepository {
 
-    // ── REGISTER ──
     override suspend fun register(request: RegisterRequest): Result<AuthResponseData> =
         withContext(Dispatchers.IO) {
             try {
                 val response = authApi.register(request)
                 val body = response.body()
-
                 if (response.isSuccessful && body?.success == true) {
-                    val token = body.data?.token ?: ""
-                    sessionManager.saveToken(token)
+                    body.data?.token?.let { sessionManager.saveToken(it) }
                     Result.success(body.data!!)
                 } else {
                     Result.failure(Exception(body?.message ?: "Đăng ký thất bại"))
@@ -39,13 +36,11 @@ class UserRepositoryImpl @Inject constructor(
             }
         }
 
-    // ── LOGIN (EMAIL/PASSWORD) ──
     override suspend fun login(request: LoginRequest): Result<AuthResponseData> =
         withContext(Dispatchers.IO) {
             try {
                 val response = authApi.login(request)
                 val body = response.body()
-
                 if (response.isSuccessful && body?.success == true) {
                     body.data?.token?.let { sessionManager.saveToken(it) }
                     Result.success(body.data!!)
@@ -57,17 +52,13 @@ class UserRepositoryImpl @Inject constructor(
             }
         }
 
-    // ── LOGIN WITH GOOGLE (MỚI) ──
     override suspend fun loginWithGoogle(idToken: String): Result<AuthResponseData> =
         withContext(Dispatchers.IO) {
             try {
-                // Đóng gói idToken vào DTO
                 val request = GoogleLoginRequest(idToken = idToken)
                 val response = authApi.loginWithGoogle(request)
                 val body = response.body()
-
                 if (response.isSuccessful && body?.success == true) {
-                    // Lưu Token hệ thống của BE trả về sau khi verify Google thành công
                     body.data?.token?.let { sessionManager.saveToken(it) }
                     Result.success(body.data!!)
                 } else {
@@ -78,15 +69,33 @@ class UserRepositoryImpl @Inject constructor(
             }
         }
 
-    // ── UPDATE PROFILE ──
+    override suspend fun getMe(): Result<User> = withContext(Dispatchers.IO) {
+        try {
+            val token = sessionManager.authToken ?: return@withContext Result.failure(Exception("Chưa đăng nhập"))
+            val myToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
+
+            val response = authApi.getMe(myToken)
+            val body = response.body()
+
+            if (response.isSuccessful && body?.data != null) {
+                val user = body.data.toDomain()
+                sessionManager.saveUser(user)
+                Result.success(user)
+            } else {
+                Result.failure(Exception("Lỗi lấy thông tin: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun updateProfile(name: String, imagePath: String?): Result<User> =
         withContext(Dispatchers.IO) {
             try {
-                val tokenFromSession = sessionManager.authToken ?: ""
-                val myToken = if (tokenFromSession.startsWith("Bearer ")) tokenFromSession else "Bearer $tokenFromSession"
+                val token = sessionManager.authToken ?: ""
+                val myToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
 
                 val nameBody = name.toRequestBody("text/plain".toMediaTypeOrNull())
-
                 val imagePart = imagePath?.let { path ->
                     val file = File(path)
                     if (file.exists()) {
@@ -96,38 +105,28 @@ class UserRepositoryImpl @Inject constructor(
                 }
 
                 val response = authApi.updateProfile(myToken, nameBody, imagePart)
+                val body = response.body()
 
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body?.data != null) {
-                        sessionManager.saveUser(body.data)
-                        Result.success(body.data)
-                    } else {
-                        Result.failure(Exception("Dữ liệu phản hồi trống"))
-                    }
+                if (response.isSuccessful && body?.data != null) {
+                    sessionManager.saveUser(body.data)
+                    Result.success(body.data)
                 } else {
-                    Result.failure(Exception("Cập nhật thất bại"))
+                    Result.failure(Exception(body?.message ?: "Cập nhật thất bại"))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
             }
         }
 
-    // ── LOGOUT ──
     override suspend fun logout(): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val tokenFromSession = sessionManager.authToken ?: ""
-            val myToken = if (tokenFromSession.startsWith("Bearer ")) tokenFromSession else "Bearer $tokenFromSession"
-
+            val token = sessionManager.authToken ?: ""
+            val myToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
             val response = authApi.logout(myToken)
 
             if (response.isSuccessful) {
-                val body = response.body()
-                val message = body?.message ?: "Đăng xuất thành công"
-
-                // Xóa token và user cục bộ
+                val message = response.body()?.message ?: "Đăng xuất thành công"
                 sessionManager.logout()
-
                 Result.success(message)
             } else {
                 Result.failure(Exception("Lỗi Server: ${response.code()}"))

@@ -15,7 +15,6 @@ import com.example.android.presentation.screens.profile.components.profile_conte
 import com.example.android.presentation.screens.profile.components.profile_setting.*
 import com.example.android.presentation.ui.theme.BgGray
 import com.example.android.presentation.ui.theme.PrimaryBlue
-
 @Composable
 fun ProfileScreen(
     onNavigateToChangePassword: () -> Unit,
@@ -26,7 +25,9 @@ fun ProfileScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Lắng nghe sự kiện từ ViewModel
+    // Dùng biến này để biết đã bấm logout chưa, tránh hiện Loading vô tận
+    var isLoggingOut by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -34,7 +35,7 @@ fun ProfileScreen(
                     snackbarHostState.showSnackbar(event.message)
                 }
                 is ProfileUiEvent.LogoutSuccess -> {
-                    Log.d("PROFILE_DEBUG", "3. Đã nhận LogoutSuccess -> Điều hướng về Login")
+                    isLoggingOut = true // Đánh dấu là đang chuyển màn hình
                     onLogoutSuccess()
                 }
             }
@@ -42,6 +43,14 @@ fun ProfileScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // CHỈ hiện vòng xoay trung tâm nếu không phải đang trong quá trình logout và data chưa về
+        if (userData == null && !isLoggingOut) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = PrimaryBlue)
+            }
+        }
+
+        // Hiển thị nội dung nếu có data
         userData?.let { user ->
             LazyColumn(
                 modifier = Modifier.fillMaxSize().background(BgGray),
@@ -65,8 +74,8 @@ fun ProfileScreen(
                 item {
                     ProStatusCard(
                         isPro = user.subscriptionType == "PREMIUM",
-                        packageName = "Premium Plan", // THÊM DÒNG NÀY
-                        price = 9.99,                 // Đảm bảo truyền đủ các tham số bắt buộc khác
+                        packageName = "Premium Plan",
+                        price = 9.99,
                         expiryDate = "2026"
                     )
                 }
@@ -76,22 +85,17 @@ fun ProfileScreen(
 
                 item { SectionTitle(title = "SECURITY & ACCOUNT") }
                 item {
-                    // QUAN TRỌNG: Kiểm tra truyền onLogoutClick
                     AccountSettingsSection(
                         onChangePasswordClick = onNavigateToChangePassword,
                         onLogoutClick = {
-                            Log.d("PROFILE_DEBUG", "1. Click vào nút Logout trên UI")
                             viewModel.logout()
                         }
                     )
                 }
             }
-        } ?: run {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryBlue)
-            }
         }
 
+        // Loading Overlay (Vòng xoay đè lên khi đang gọi API)
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.3f)),
