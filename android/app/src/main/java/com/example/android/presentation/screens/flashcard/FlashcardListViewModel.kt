@@ -27,11 +27,22 @@ class FlashcardViewModel @Inject constructor(
     private val deckRepository: DeckRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val deckId: String = savedStateHandle.get<String>("deckId") ?: ""
     init {
         flashcardRepository.scheduleSync()
+        if (deckId.isNotEmpty()) {
+            loadCards(deckId)
+        }
+    }
+
+    // HUY THÊM ĐOẠN NÀY VÀO ĐỂ HẾT LỖI ĐỎ
+    fun loadCards(deckId: String) {
+        viewModelScope.launch {
+            // Đây chính là hàm Huy vừa thêm vào Repository đêm qua
+            flashcardRepository.fetchCardsFromServer(deckId)
+        }
     }
     //lay deckId tu Navigation truy cho
-    private val deckId: String = savedStateHandle.get<String>("deckId") ?: ""
     // 1. Quản lý ID của bộ thẻ hiện tại
     val deckInfo = if (deckId.isEmpty()) flowOf(null)
 

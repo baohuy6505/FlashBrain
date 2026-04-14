@@ -1,5 +1,6 @@
 package com.example.android.presentation.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android.domain.repository.DeckRepository
@@ -19,6 +20,25 @@ class HomeViewModel @Inject constructor(
     private val deckRepository: DeckRepository
 ) : ViewModel() {
 
+    init {
+        // Gọi hàm kéo dữ liệu ngay khi vào màn hình Home
+        fetchData()
+    }
+    fun fetchData() {
+        viewModelScope.launch {
+            try {
+                // 1. Kéo danh sách bộ thẻ về (Máy 2 sẽ thấy Deck mới từ máy 1)
+                deckRepository.fetchDecksFromServer()
+
+                // 2. Kéo tiến độ học tập (Streak, Point...)
+                progressRepository.syncFromServer()
+
+                Log.d("HUY_DEBUG", "Đã đồng bộ xong dữ liệu từ Server!")
+            } catch (e: Exception) {
+                Log.e("HUY_DEBUG", "Lỗi khi sync: ${e.message}")
+            }
+        }
+    }
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
