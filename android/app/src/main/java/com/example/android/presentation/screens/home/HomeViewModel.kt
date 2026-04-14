@@ -19,38 +19,30 @@ class HomeViewModel @Inject constructor(
     private val flashcardRepository: FlashcardRepository,
     private val deckRepository: DeckRepository
 ) : ViewModel() {
-
-    init {
-        // Gọi hàm kéo dữ liệu ngay khi vào màn hình Home
-        fetchData()
-    }
-    fun fetchData() {
-        viewModelScope.launch {
-            try {
-                // 1. Kéo danh sách bộ thẻ về (Máy 2 sẽ thấy Deck mới từ máy 1)
-                deckRepository.fetchDecksFromServer()
-
-                // 2. Kéo tiến độ học tập (Streak, Point...)
-                progressRepository.syncFromServer()
-
-                Log.d("HUY_DEBUG", "Đã đồng bộ xong dữ liệu từ Server!")
-            } catch (e: Exception) {
-                Log.e("HUY_DEBUG", "Lỗi khi sync: ${e.message}")
-            }
-        }
-    }
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     private val _syncError = MutableSharedFlow<String>()
     val syncError: SharedFlow<String> = _syncError.asSharedFlow()
-
     init {
         observeProgress()
-        syncFromServer()
+        // Gọi hàm kéo dữ liệu ngay khi vào màn hình Home
+        fetchData()
+    }
+    fun fetchData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Kéo tất cả về: Deck, Progress
+                deckRepository.fetchDecksFromServer()
+                progressRepository.syncFromServer()
+
+                Log.d("HUY_DEBUG", "SYNC_RESUME_OK: Đã tự động cập nhật dữ liệu mới nhất!")
+            } catch (e: Exception) {
+                Log.e("HUY_DEBUG", "SYNC_RESUME_FAIL: ${e.message}")
+            }
+        }
     }
 
-    // 1. Lắng nghe Streak + TotalLearned từ local DB
     private fun observeProgress() {
         progressRepository.getProgress()
             .filterNotNull()
@@ -65,6 +57,12 @@ class HomeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
+//    private val _state = MutableStateFlow(HomeState())
+//    val state: StateFlow<HomeState> = _state.asStateFlow()
+//
+//    private val _syncError = MutableSharedFlow<String>()
+//    val syncError: SharedFlow<String> = _syncError.asSharedFlow()
+
 
 
     // 5. Sync server

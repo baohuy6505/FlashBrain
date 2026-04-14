@@ -46,10 +46,6 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
         }
-        // 2. ÉP BẢN DEBUG SÀI CẤU HÌNH CHUNG
-        debug {
-            signingConfig = signingConfigs.getByName("debug")
-        }
     }
 
     compileOptions {
